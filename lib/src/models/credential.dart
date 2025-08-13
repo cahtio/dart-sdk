@@ -1,4 +1,11 @@
+import 'dart:convert';
+
+import 'package:json_annotation/json_annotation.dart';
+
+part 'credential.g.dart';
+
 /// A data structure representing a credential
+@JsonSerializable()
 class Credential {
   /// Validation method
   final String? meth;
@@ -19,20 +26,16 @@ class Credential {
   Credential({this.meth, this.val, this.resp, this.params, this.done});
 
   static Credential fromMessage(Map<String, dynamic> msg) {
-    return Credential(
-      meth: msg['meth'],
-      val: msg['val'],
-      done: msg['done'],
-    );
+    return Credential(meth: msg['meth'], val: msg['val'], done: msg['done']);
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'meth': meth,
-      'val': val,
-      'resp': resp,
-      'done': done,
-      'params': params,
-    };
+  factory Credential.fromJson(Map<String, dynamic> json) =>
+      _$CredentialFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CredentialToJson(this);
+
+  @override
+  String toString() {
+    return 'Credential(${identityHashCode(this)}){meth: $meth, val: $val, resp: $resp, done: $done, params: $params}';
   }
 }

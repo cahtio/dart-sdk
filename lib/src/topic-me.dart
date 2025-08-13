@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 import 'dart:math';
@@ -23,10 +25,12 @@ class TopicMe extends Topic {
   final Map<String, TopicSubscription> _contacts = {};
 
   /// This event will be triggered when a contact is updated
-  PublishSubject<ContactUpdateEvent> onContactUpdate = PublishSubject<ContactUpdateEvent>();
+  PublishSubject<ContactUpdateEvent> onContactUpdate =
+      PublishSubject<ContactUpdateEvent>();
 
   /// This event will be triggered when credentials are updated
-  PublishSubject<List<Credential>> onCredsUpdated = PublishSubject<List<Credential>>();
+  PublishSubject<List<Credential>> onCredsUpdated =
+      PublishSubject<List<Credential>>();
 
   // Credentials such as email or phone number.
   List<Credential> _credentials = [];
@@ -50,7 +54,9 @@ class TopicMe extends Topic {
   @override
   void processMetaDesc(TopicDescription desc) {
     // Check if online contacts need to be turned off because P permission was removed.
-    var turnOff = (desc.acs != null && !desc.acs!.isPresencer(null)) && acs.isPresencer(null);
+    var turnOff =
+        (desc.acs != null && !desc.acs!.isPresencer(null)) &&
+        acs.isPresencer(null);
 
     // Copy parameters from desc object to this topic
     acs = desc.acs ?? acs;
@@ -89,7 +95,8 @@ class TopicMe extends Topic {
     for (var sub in subscriptions) {
       var topicName = sub.topic;
       // Don't show 'me' and 'fnd' topics in the list of contacts.
-      if (topicName == topic_names.TOPIC_FND || topicName == topic_names.TOPIC_ME) {
+      if (topicName == topic_names.TOPIC_FND ||
+          topicName == topic_names.TOPIC_ME) {
         continue;
       }
 
@@ -174,7 +181,8 @@ class TopicMe extends Topic {
             if (cr.done == false || cr.done == null) {
               // Unconfirmed credential replaces previous unconfirmed credential of the same method.
               idx = _credentials.indexWhere((el) {
-                return el.meth == cr.meth && (el.done == false || cr.done == null);
+                return el.meth == cr.meth &&
+                    (el.done == false || cr.done == null);
               });
               if (idx >= 0) {
                 // Remove previous unconfirmed credential.
@@ -243,8 +251,12 @@ class TopicMe extends Topic {
           cont.seq = (pres.seq ?? 0) | 0;
           // Check if message is sent by the current user. If so it's been read already.
           if (pres.act == null || _tinodeService.isMe(pres.act ?? '')) {
-            cont.read = cont.read != null && cont.read != 0 ? max((cont.read ?? 0), (cont.seq ?? 0)) : cont.seq;
-            cont.recv = cont.recv != null && cont.recv != 0 ? max((cont.read ?? 0), (cont.recv ?? 0)) : cont.read;
+            cont.read = cont.read != null && cont.read != 0
+                ? max((cont.read ?? 0), (cont.seq ?? 0))
+                : cont.seq;
+            cont.recv = cont.recv != null && cont.recv != 0
+                ? max((cont.read ?? 0), (cont.recv ?? 0))
+                : cont.read;
           }
           cont.unread = (cont.seq ?? 0) - ((cont.read ?? 0) | 0);
           break;
@@ -267,13 +279,19 @@ class TopicMe extends Topic {
           break;
         case 'recv': // user's other session marked some messages as received
           pres.seq = (pres.seq ?? 0) | 0;
-          cont.recv = cont.recv != null && cont.recv != 0 ? max((cont.recv ?? 0), (pres.seq ?? 0)) : pres.seq;
+          cont.recv = cont.recv != null && cont.recv != 0
+              ? max((cont.recv ?? 0), (pres.seq ?? 0))
+              : pres.seq;
           break;
         case 'read':
           // user's other session marked some messages as read
           pres.seq = (pres.seq ?? 0) | 0;
-          cont.read = cont.read != null && cont.read != 0 ? max((cont.read ?? 0), (pres.seq ?? 0)) : pres.seq;
-          cont.recv = cont.recv != null && cont.recv != 0 ? max((cont.read ?? 0), (cont.recv ?? 0)) : cont.recv;
+          cont.read = cont.read != null && cont.read != 0
+              ? max((cont.read ?? 0), (pres.seq ?? 0))
+              : pres.seq;
+          cont.recv = cont.recv != null && cont.recv != 0
+              ? max((cont.read ?? 0), (cont.recv ?? 0))
+              : cont.recv;
           cont.unread = (cont.seq ?? 0) - (cont.read ?? 0);
           break;
         case 'gone':
@@ -285,7 +303,9 @@ class TopicMe extends Topic {
           // Update topic.del value.
           break;
         default:
-          _loggerService.log("Unsupported presence update in 'me' " + (pres.what ?? ''));
+          _loggerService.log(
+            "Unsupported presence update in 'me' " + (pres.what ?? ''),
+          );
       }
 
       onContactUpdate.add(ContactUpdateEvent(pres.what!, cont));
@@ -297,16 +317,31 @@ class TopicMe extends Topic {
         AccessMode? acs = AccessMode(pres.dacs);
 
         if (acs.mode == INVALID) {
-          _loggerService.error('Invalid access mode update ' + (pres.src ?? '') + ' ' + pres.dacs.toString());
+          _loggerService.error(
+            'Invalid access mode update ' +
+                (pres.src ?? '') +
+                ' ' +
+                pres.dacs.toString(),
+          );
           return;
         } else if (acs.mode == NONE) {
-          _loggerService.warn('Removing non-existent subscription ' + (pres.src ?? '') + ' ' + pres.dacs.toString());
+          _loggerService.warn(
+            'Removing non-existent subscription ' +
+                (pres.src ?? '') +
+                ' ' +
+                pres.dacs.toString(),
+          );
         } else {
           // New subscription. Send request for the full description.
           // Using .withOneSub (not .withLaterOneSub) to make sure IfModifiedSince is not set.
           getMeta(startMetaQuery().withOneSub(null, pres.src).build());
           // Create a dummy entry to catch online status update.
-          _contacts[pres.src ?? ''] = TopicSubscription(touched: DateTime.now(), topic: pres.src, online: false, acs: acs);
+          _contacts[pres.src ?? ''] = TopicSubscription(
+            touched: DateTime.now(),
+            topic: pres.src,
+            online: false,
+            acs: acs,
+          );
         }
       } else if (pres.what == 'tags') {
         getMeta(startMetaQuery().withTags().build());
@@ -324,7 +359,9 @@ class TopicMe extends Topic {
   /// Delete validation credential
   Future<CtrlMessage> deleteCredential(String method, String value) async {
     if (!isSubscribed) {
-      return Future.error(Exception("Cannot delete credential in inactive 'me' topic"));
+      return Future.error(
+        Exception("Cannot delete credential in inactive 'me' topic"),
+      );
     }
 
     // Send {del} message, return promise
@@ -372,7 +409,8 @@ class TopicMe extends Topic {
         case 'msg':
           oldVal = cont.seq;
           cont.seq = max(cont.seq ?? 0, seq);
-          if (cont.touched == null || (ts != null && cont.touched!.isBefore(ts))) {
+          if (cont.touched == null ||
+              (ts != null && cont.touched!.isBefore(ts))) {
             cont.touched = ts;
           }
           doUpdate = (oldVal != cont.seq);
@@ -386,7 +424,8 @@ class TopicMe extends Topic {
       }
       if ((cont.seq ?? 0) < (cont.recv ?? 0)) {
         cont.seq = cont.recv;
-        if (cont.touched == null || (ts != null && cont.touched!.isBefore(ts))) {
+        if (cont.touched == null ||
+            (ts != null && cont.touched!.isBefore(ts))) {
           cont.touched = ts;
         }
         doUpdate = true;
@@ -432,7 +471,18 @@ class TopicMe extends Topic {
   /// Check if contact is archived, i.e. contact.private.arch == true.
   bool? isContactArchived(String topicName) {
     var cont = _contacts[topicName];
-    return cont != null ? ((cont.private && cont.private.arch) ? true : false) : null;
+    return cont != null
+        ? ((cont.private && cont.private.arch) ? true : false)
+        : null;
+  }
+
+  String serializeCreds() {
+    return json.encode(_credentials);
+  }
+
+  void deserializeCreds(String data) {
+    List<dynamic> jsonList = json.decode(data);
+    _credentials = jsonList.map((json) => Credential.fromJson(json)).toList();
   }
 
   /// Get the user's credentials: email, phone, etc.

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/access-mode.dart';
 
@@ -53,6 +55,8 @@ class TopicSubscription {
   /// Application-defined user's 'private' object.
   dynamic private;
 
+  dynamic trusted;
+
   /// current online status of the user; if this is a
   /// group or a p2p topic, it's user's online status in the topic,
   /// i.e. if the user is attached and listening to messages; if this
@@ -83,6 +87,8 @@ class TopicSubscription {
   String? mode;
 
   int? unread;
+
+  dynamic payload;
 
   TopicSubscription({
     this.user,
@@ -163,5 +169,35 @@ class TopicSubscription {
       touched: touched,
       updated: updated,
     );
+  }
+
+  String serializePub() {
+    return json.encode(public);
+  }
+
+  bool deserializePub(String? data) {
+    if (data == null) return false;
+    public = json.decode(data);
+    return true;
+  }
+
+  String serializePriv() {
+    return json.encode(private);
+  }
+
+  bool deserializePriv(String? data) {
+    if (data == null) return false;
+    private = json.decode(data);
+    return true;
+  }
+
+  String serializeTrusted() {
+    return json.encode(trusted);
+  }
+
+  bool deserializeTrusted(String? data) {
+    if (data == null) return false;
+    trusted = json.decode(data);
+    return true;
   }
 }

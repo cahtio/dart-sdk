@@ -4,6 +4,7 @@ import 'package:tinode/src/models/topic-names.dart' as topic_names;
 import 'package:tinode/src/models/connection-options.dart';
 import 'package:tinode/src/models/access-mode.dart';
 import 'package:tinode/src/models/values.dart';
+import 'package:tinode/src/topic.dart';
 
 /// Initialize a random message Id
 var messageId = Random().nextInt(0xFFFF) + 0xFFFF;
@@ -39,6 +40,36 @@ class Tools {
       return AccessMode(value);
     }
     return value;
+  }
+
+  static TopicType topicTypeByName(String? name) {
+    var result = TopicType.unknown;
+    if (name != null && name.isNotEmpty) {
+      switch (name) {
+        case topic_names.TOPIC_ME:
+          result = TopicType.me;
+          break;
+        case topic_names.TOPIC_FND:
+          result = TopicType.fnd;
+          break;
+        case topic_names.TOPIC_SYS:
+          result = TopicType.sys;
+          break;
+        case topic_names.TOPIC_SLF:
+          result = TopicType.slf;
+          break;
+        default:
+          if (name.startsWith(topic_names.TOPIC_GRP_PREFIX) ||
+              name.startsWith(topic_names.TOPIC_NEW) ||
+              name.startsWith(topic_names.TOPIC_CHN_PREFIX) ||
+              name.startsWith(topic_names.TOPIC_CHANNEL_NEW)) {
+            result = TopicType.grp;
+          } else if (name.startsWith(topic_names.TOPIC_USR_PREFIX)) {
+            result = TopicType.p2p;
+          }
+      }
+    }
+    return result;
   }
 
   /// Returns the type of topic based on topic name

@@ -60,8 +60,9 @@ class AccessMode {
   /// Create new instance by passing an `AccessMode` or `Map<String, dynamic>`
   AccessMode(dynamic acs) {
     if (acs != null) {
-      _given =
-          acs['given'] is int ? acs['given'] : AccessMode.decode(acs['given']);
+      _given = acs['given'] is int
+          ? acs['given']
+          : AccessMode.decode(acs['given']);
       _want = acs['want'] is int ? acs['want'] : AccessMode.decode(acs['want']);
 
       if (acs['mode'] != null) {
@@ -336,5 +337,16 @@ class AccessMode {
       'given': AccessMode.encode(_given) ?? 'invalid',
       'want': AccessMode.encode(_want) ?? 'invalid',
     };
+  }
+
+  String serialize() {
+    return [mode.toString(), _want.toString(), _given.toString()].join(',');
+  }
+
+  static AccessMode? deserialize(String data) {
+    final parts = data.split(',').map((e) => int.parse(e)).toList();
+    if (parts.length != 3) return null;
+
+    return AccessMode({'mode': parts[0], 'want': parts[1], 'given': parts[2]});
   }
 }
