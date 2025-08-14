@@ -101,6 +101,7 @@ class TopicDb {
 
   // 从数据库行数据反序列化为TopicProto
   void deserializeTopic(Topic topic, Map<String, dynamic> row) {
+    BaseDb.log.info('TopicDb.insert: deserializeTopic.');
     var st = StoredTopic()
       ..id = row[columnId]
       ..status = BaseDbStatus.values.firstWhere(
@@ -113,6 +114,8 @@ class TopicDb {
       ..minLocalSeq = row[columnMinLocalSeq]
       ..maxLocalSeq = row[columnMaxLocalSeq]
       ..nextUnsentId = row[columnNextUnsentSeq];
+
+    BaseDb.log.info('TopicDb.insert: StoredTopic.');
 
     topic.updated = row[columnUpdated] != null
         ? DateTime.parse(row[columnUpdated])
@@ -127,17 +130,24 @@ class TopicDb {
     topic.clear = row[columnClear];
     topic.maxDel = row[columnMaxDel] ?? 0;
 
+    BaseDb.log.info('TopicDb.insert: topic.');
+
     if (topic is TopicMe) {
       topic.deserializeCreds(row[columnCreds]);
     }
+
+    BaseDb.log.info('TopicDb.insert: TopicMe.');
+    BaseDb.log.info('${row[columnTags]}');
     if (row[columnTags]) {
       topic.tags = row[columnTags]!.toString().split(',');
     }
-
+    BaseDb.log.info('TopicDb.insert: decodeAcs.');
     final decodeAcs = AccessMode.deserialize(row[columnAccessMode]);
     if (decodeAcs != null) {
       topic.acs = decodeAcs;
     }
+
+    BaseDb.log.info('TopicDb.insert: defacs.');
 
     topic.defacs = DefAcs.deserialize(row[columnDefacs]);
     topic.public = json.decode(row[columnPub]);
@@ -209,6 +219,7 @@ class TopicDb {
 
   // 从行数据读取话题
   Topic? readOneFromRow(Map<String, dynamic> row) {
+    BaseDb.log.info('TopicDb.insert: readOneFromRow.');
     var topicName = row[columnTopic] as String?;
     if (topicName == null) return null;
 
@@ -226,7 +237,13 @@ class TopicDb {
     }
 
     try {
-      // 初始时间（与原Swift保持一致）
+      BaseDb.log.info('TopicDb.insert: readOne.');
+      var res = await readOne(_topic.name);
+      if (res != null) {
+        BaseDb.log.info('TopicDb.insert: read for cache.');
+        _topic.payload = res.payload;
+        return (res.payload as StoredTopic).id!;
+      }
       var _lastUsed =
           _topic.touched ?? DateTime.fromMillisecondsSinceEpoch(1414213562000);
       var tp = _topic.topicType;
@@ -244,7 +261,7 @@ class TopicDb {
         columnType: tp.rawValue,
         columnVisible: [TopicType.grp, TopicType.p2p].contains(tp) ? 1 : 0,
         columnCreated: _lastUsed.toIso8601String(),
-        columnUpdated: _topic.updated.toIso8601String(),
+        columnUpdated: _topic.updated?.toIso8601String(),
         columnRead: _topic.read,
         columnRecv: _topic.recv,
         columnSeq: _topic.seq,
@@ -294,7 +311,7 @@ class TopicDb {
       setters[columnTopic] = _topic.name;
     }
 
-    setters[columnUpdated] = _topic.updated.toIso8601String();
+    setters[columnUpdated] = _topic.updated?.toIso8601String();
     setters[columnRead] = _topic.read;
     setters[columnRecv] = _topic.recv;
     setters[columnSeq] = _topic.seq;

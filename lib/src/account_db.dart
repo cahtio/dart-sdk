@@ -65,7 +65,14 @@ class AccountDb {
 
   // 根据uid获取账户
   Future<StoredAccount?> getByUid(String uid) async {
-    final List<Map<String, dynamic>> maps = await _db.query(
+    return _getByUidAndTxn(uid, _db);
+  }
+
+  Future<StoredAccount?> _getByUidAndTxn(
+    String uid,
+    DatabaseExecutor db,
+  ) async {
+    final List<Map<String, dynamic>> maps = await db.query(
       kTableName,
       columns: [columnId, columnCredMethods],
       where: '$columnUid = ?',
@@ -92,14 +99,16 @@ class AccountDb {
   }) async {
     final serializedCredMeth = credMethods?.join(',');
     StoredAccount? result;
-
+    BaseDb.log.info(
+      'Account.addOrActivateAccount uid: $uid; credMethods: $credMethods;',
+    );
     try {
       await _db.transaction((txn) async {
         // 先将所有账户设为非活跃
         await txn.update(kTableName, {columnActive: 0});
 
         // 查找现有账户
-        final existing = await getByUid(uid);
+        final existing = await _getByUidAndTxn(uid, txn);
         if (existing != null) {
           // 更新现有账户
           await txn.update(
@@ -131,7 +140,6 @@ class AccountDb {
       BaseDb.log.error('Failed to add account for uid $uid: $e');
       result = null;
     }
-
     return result;
   }
 

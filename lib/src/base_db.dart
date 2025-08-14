@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:tinode/src/sql_store.dart';
 import 'package:tinode/src/subscriber_db.dart';
 import 'package:tinode/src/topic_db.dart';
 import 'account_db.dart';
@@ -126,11 +127,12 @@ class BaseDb {
     );
 
     // 初始化数据库操作类
-    accountDb = AccountDb(_db!);
-    userDb = UserDb(_db!, this);
-    topicDb = TopicDb(_db!, this);
-    subscriberDb = SubscriberDb(_db!, this);
-    messageDb = MessageDb(_db!, this);
+    accountDb ??= AccountDb(_db!);
+    userDb ??= UserDb(_db!, this);
+    topicDb ??= TopicDb(_db!, this);
+    subscriberDb ??= SubscriberDb(_db!, this);
+    messageDb ??= MessageDb(_db!, this);
+
     sqlStore = SqlStore(this);
 
     // 启用外键约束
@@ -138,16 +140,27 @@ class BaseDb {
 
     // 获取活动账户
     account = await accountDb?.getActiveAccount();
+
+    BaseDb.log.info('Initializing finish.');
   }
 
   // 创建所有表
   Future<void> _createTables(Database db) async {
     BaseDb.log.info('Creating SQLite db tables.');
-    await accountDb?.createTable();
-    await userDb?.createTable();
-    await topicDb?.createTable();
-    await subscriberDb?.createTable();
-    await messageDb?.createTable();
+
+    accountDb = AccountDb(db);
+    userDb = UserDb(db, this);
+    topicDb = TopicDb(db, this);
+    subscriberDb = SubscriberDb(db, this);
+    messageDb = MessageDb(db, this);
+
+    await accountDb!.createTable();
+    await userDb!.createTable();
+    await topicDb!.createTable();
+    await subscriberDb!.createTable();
+    await messageDb!.createTable();
+
+    BaseDb.log.info('Creating SQLite db tables finish.');
   }
 
   // 删除所有表
@@ -218,6 +231,7 @@ class BaseDb {
 
   // 登出
   Future<void> logout() async {
+    BaseDb.log.info('logout');
     await _accessQueue;
     await setUid(uid: null, credMethods: null);
     await clearDb();
@@ -297,11 +311,4 @@ class BaseDb {
       return false;
     }
   }
-}
-
-// 以下是需要实现的相关类的骨架
-class SqlStore {
-  final BaseDb dbh;
-
-  SqlStore(this.dbh);
 }

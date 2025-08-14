@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:tinode/src/base_db.dart';
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/access-mode.dart';
 
@@ -89,6 +90,12 @@ class TopicSubscription {
   int? unread;
 
   dynamic payload;
+
+  String? get uniqueId {
+    if (topic == null) return user;
+    if (user == null) return topic;
+    return '$topic:$user';
+  }
 
   TopicSubscription({
     this.user,
@@ -199,5 +206,10 @@ class TopicSubscription {
     if (data == null) return false;
     trusted = json.decode(data);
     return true;
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType(user: $user, updated: $updated, touched: $touched, deleted: $deleted, created: $created, acs: $acs, read: $read, recv: $recv, clear: $clear, public: $public, private: $private, trusted: $trusted, online: $online, topic: $topic, seq: $seq, seen: $seen, noForwarding: $noForwarding, mode: $mode, unread: $unread, payload: $payload)';
   }
 }

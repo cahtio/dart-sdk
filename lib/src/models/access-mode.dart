@@ -36,13 +36,13 @@ const int AccessModePermissionsBITMASK =
 /// limited to managing presence notifications and banning uses from initiating or continuing P2P conversations.
 class AccessMode {
   /// Permissions granted to user by topic's manager
-  late int _given;
+  int _given = 0;
 
   /// User's desired permissions
-  late int _want;
+  int _want = 0;
 
   /// Combination of want and given
-  late int mode;
+  int mode = 0;
 
   int operator [](other) {
     switch (other) {

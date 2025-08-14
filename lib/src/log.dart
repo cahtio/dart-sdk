@@ -39,20 +39,20 @@ class Log {
     String typePrefix;
     switch (type) {
       case LogType.debug:
-        typePrefix = "[DEBUG] ";
+        typePrefix = '[DEBUG] ';
         break;
       case LogType.info:
-        typePrefix = "[INFO] ";
+        typePrefix = '[INFO] ';
         break;
       case LogType.error:
-        typePrefix = "[ERROR] ";
+        typePrefix = '[ERROR] ';
         break;
       case LogType.fault:
-        typePrefix = "[FAULT] ";
+        typePrefix = '[FAULT] ';
         break;
     }
 
-    debugPrint("$typePrefix$formattedMessage");
+    debugPrint('$typePrefix$formattedMessage');
   }
 
   String _formatMessage(String message, List<dynamic> args) {

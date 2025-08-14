@@ -42,7 +42,7 @@ class SqlStore implements Storage {
   int _myId = -1;
   var _timeAdjustment = Duration.zero;
 
-  SqlStore({required BaseDb dbh}) : _dbh = dbh;
+  SqlStore(this._dbh);
 
   @override
   Future<void> logout() async {

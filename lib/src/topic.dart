@@ -59,7 +59,7 @@ class Topic {
   DateTime? created;
 
   /// Timestamp when the topic was last updated
-  late DateTime updated;
+  DateTime? updated;
 
   /// Timestamp of the last messages
   DateTime? touched;
@@ -97,7 +97,7 @@ class Topic {
   int maxDel = 0;
 
   ///  User discovery tags
-  late List<String> tags;
+  List<String> tags = [];
 
   /// Message cache, sorted by message seq values, from old to new
   final SortedCache<DataMessage> _messages = SortedCache<DataMessage>(
