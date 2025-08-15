@@ -181,13 +181,19 @@ class TinodeService {
     var formattedPkt = pkt.toMap();
     formattedPkt['id'] = pkt.id;
     formattedPkt.keys
-        .where((k) =>
-            formattedPkt[k] == null ||
-            (formattedPkt[k] is Map && formattedPkt[k].isEmpty))
+        .where(
+          (k) =>
+              formattedPkt[k] == null ||
+              (formattedPkt[k] is Map && formattedPkt[k].isEmpty),
+        )
         .toList()
         .forEach(formattedPkt.remove);
 
-    var json = jsonEncode({pkt.name: formattedPkt});
+    final data = {pkt.name: formattedPkt};
+    if (pkt.extra != null) {
+      data['extra'] = pkt.extra!;
+    }
+    var json = jsonEncode(data);
     try {
       _connectionService.sendText(json);
       _loggerService.log('out: ' + json);
@@ -195,7 +201,11 @@ class TinodeService {
       if (pkt.id != null) {
         _loggerService.error(e.toString());
         _futureManager.execFuture(
-            pkt.id, _configService.appSettings.networkError, null, 'Error');
+          pkt.id,
+          _configService.appSettings.networkError,
+          null,
+          'Error',
+        );
       } else {
         rethrow;
       }
@@ -214,8 +224,13 @@ class TinodeService {
   }
 
   /// Create or update an account
-  Future account(String userId, String scheme, String secret, bool login,
-      AccountParams? params) {
+  Future account(
+    String userId,
+    String scheme,
+    String secret,
+    bool login,
+    AccountParams? params,
+  ) {
     Packet? packet = _packetGenerator.generate(packet_types.Acc, null);
     var data = packet.data as AccPacketData;
     data.user = userId;
@@ -239,7 +254,10 @@ class TinodeService {
 
   /// Authenticate current session
   Future<CtrlMessage> login(
-      String scheme, String secret, Map<String, dynamic>? cred) async {
+    String scheme,
+    String secret,
+    Map<String, dynamic>? cred,
+  ) async {
     var packet = _packetGenerator.generate(packet_types.Login, null);
     var data = packet.data as LoginPacketData;
     data.scheme = scheme;
@@ -255,7 +273,10 @@ class TinodeService {
 
   /// Send a topic subscription request
   Future subscribe(
-      String? topicName, GetQuery getParams, SetParams? setParams) {
+    String? topicName,
+    GetQuery getParams,
+    SetParams? setParams,
+  ) {
     var packet = _packetGenerator.generate(packet_types.Sub, topicName);
     var data = packet.data as SubPacketData;
 
@@ -424,8 +445,10 @@ class TinodeService {
 
   /// Delete credential. Always sent on 'me' topic
   Future deleteCredential(String method, String value) {
-    var packet =
-        _packetGenerator.generate(packet_types.Del, topic_names.TOPIC_ME);
+    var packet = _packetGenerator.generate(
+      packet_types.Del,
+      topic_names.TOPIC_ME,
+    );
     var data = packet.data as DelPacketData;
     data.what = 'cred';
     data.cred = {'meth': method, 'val': value};

@@ -17,6 +17,7 @@ class Message {
   dynamic content;
   String? topicName;
   bool? noForwarding;
+  List<String>? attachments;
 
   late PacketGenerator _packetGenerator;
 
@@ -33,6 +34,9 @@ class Message {
     data.content = content;
     data.noecho = !echo;
     packet.data = data;
+    if (attachments != null) {
+      packet.extra = {'attachments': attachments};
+    }
     return packet;
   }
 

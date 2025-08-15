@@ -4,6 +4,7 @@ class Packet {
   String? id;
   String? name;
   PacketData? data;
+  Map<String, dynamic>? extra;
 
   bool? failed;
   bool? sending;
