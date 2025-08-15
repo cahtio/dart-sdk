@@ -57,6 +57,10 @@ class CacheManager {
     return delete('user', userId);
   }
 
+  Topic? getTopic(String name) {
+    return get('topic', name);
+  }
+
   /// This is a wrapper for `put` function which puts a topic into cache
   void putTopic(Topic topic) {
     return put('topic', (topic.name ?? ''), topic);

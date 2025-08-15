@@ -2,9 +2,11 @@ library tinode;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tinode/src/base_db.dart';
 
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
 import 'package:tinode/src/models/server-configuration.dart';
@@ -43,6 +45,7 @@ export 'package:tinode/src/models/app-settings.dart';
 export 'package:tinode/src/models/packet-types.dart';
 export 'package:tinode/src/models/packet-data.dart';
 export 'package:tinode/src/models/auth-token.dart';
+
 // export 'package:tinode/src/models/auth-token.dart';
 export 'package:tinode/src/models/credential.dart';
 export 'package:tinode/src/models/set-params.dart';
@@ -79,6 +82,8 @@ class Tinode {
   /// Connection service, responsible for establishing a websocket connection to the server
   late ConnectionService _connectionService;
 
+  late BaseDb _baseDb;
+
   /// `onMessage` subscription stored to unsubscribe later
   StreamSubscription? _onMessageSubscription;
 
@@ -87,6 +92,8 @@ class Tinode {
 
   /// `onDisconnect` subscription stored to unsubscribe later
   StreamSubscription? _onDisconnectedSubscription;
+
+  StreamSubscription? _onDatabaseReadySubscription;
 
   /// `onConnected` event will be triggered when connection opens
   PublishSubject<void> onConnected = PublishSubject<void>();
@@ -102,6 +109,8 @@ class Tinode {
 
   /// `onRawMessage` event will be triggered when a message is received value will be a json
   PublishSubject<String> onRawMessage = PublishSubject<String>();
+
+  var topicsLoaded = false;
 
   /// Creates an instance of Tinode interface to interact with tinode server using websocket
   ///
@@ -131,6 +140,7 @@ class Tinode {
       GetIt.I.registerSingleton<PacketGenerator>(PacketGenerator());
       GetIt.I.registerSingleton<CacheManager>(CacheManager());
       GetIt.I.registerSingleton<TinodeService>(TinodeService());
+      GetIt.I.registerSingleton<BaseDb>(BaseDb.sharedInstance);
     }
   }
 
@@ -143,6 +153,7 @@ class Tinode {
     _connectionService = GetIt.I.get<ConnectionService>();
     _cacheManager = GetIt.I.get<CacheManager>();
     _authService = GetIt.I.get<AuthService>();
+    _baseDb = GetIt.I.get<BaseDb>();
   }
 
   /// Subscribe to needed events like connection
@@ -160,7 +171,32 @@ class Tinode {
       _onConnectionDisconnect();
     });
 
+    _onDatabaseReadySubscription ??= _baseDb.onDatabaseReady.listen((_) {
+      _loadTopics();
+    });
+
     _futureManager.startCheckingExpiredFutures();
+  }
+
+  bool _loadTopics() {
+    if (topicsLoaded) return true;
+    if (_baseDb.sqlStore!.isReady) {
+      _baseDb.sqlStore!.topicGetAll(this).then((allTopics) {
+        if (allTopics == null) return;
+        for (var t in allTopics) {
+          _cacheManager.putTopic(t);
+        }
+        _baseDb.sqlStore!.getLatestMessagePreviews().then((messages) {
+          if (messages == null) return;
+          for (var m in messages) {
+            if (m.topic == null) continue;
+            final topic = _cacheManager.getTopic(m.topic!);
+            topic?.lastMessage = m;
+          }
+        });
+      });
+    }
+    return topicsLoaded;
   }
 
   /// Unsubscribe every subscription to prevent memory leak

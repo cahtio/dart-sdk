@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -79,6 +80,8 @@ class BaseDb {
 
   Database? get DB => _db;
 
+  final onDatabaseReady = PublishSubject<void>();
+
   // 私有构造函数确保单例
   BaseDb._private() : _pathToDatabase = '' {
     // 初始化路径将在init中完成
@@ -142,6 +145,7 @@ class BaseDb {
     account = await accountDb?.getActiveAccount();
 
     BaseDb.log.info('Initializing finish.');
+    onDatabaseReady.add(null);
   }
 
   // 创建所有表
@@ -235,7 +239,7 @@ class BaseDb {
     await _accessQueue;
     await setUid(uid: null, credMethods: null);
     await clearDb();
-    _instance = null;
+    // _instance = null;
   }
 
   // 删除用户

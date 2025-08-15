@@ -4,11 +4,13 @@ import 'package:sqflite/sqflite.dart';
 import 'package:tinode/src/account_db.dart';
 import 'package:tinode/src/models/def-acs.dart';
 import 'package:tinode/src/subscriber_db.dart';
+import 'package:tinode/src/topic-fnd.dart';
 import 'message_db.dart';
 import 'topic.dart';
 import 'topic-me.dart';
 import 'models/access-mode.dart';
 import 'base_db.dart';
+import 'package:tinode/src/models/topic-names.dart' as topic_names;
 
 class TopicDb {
   static const String kTableName = 'topics';
@@ -213,24 +215,33 @@ class TopicDb {
     var topicName = row[columnTopic] as String?;
     if (topicName == null) return null;
 
-    var t = Topic(topicName);
+    Topic t;
+    if (topicName == topic_names.TOPIC_ME) {
+      t = TopicMe();
+    } else if (topicName == topic_names.TOPIC_FND) {
+      t = TopicFnd();
+    } else {
+      t = Topic(topicName);
+    }
+
     deserializeTopic(t, row);
     return t;
   }
 
   // 插入新话题
   Future<int> insert(Topic _topic) async {
+    BaseDb.log.info('TopicDb - insert insert');
     var accountIdVal = _baseDb.account?.id;
     if (accountIdVal == null) {
       return -1;
     }
 
     try {
-      var res = await readOne(_topic.name);
-      if (res != null) {
-        _topic.payload = res.payload;
-        return (res.payload as StoredTopic).id!;
-      }
+      // var res = await readOne(_topic.name);
+      // if (res != null) {
+      //   _topic.payload = res.payload;
+      //   return (res.payload as StoredTopic).id!;
+      // }
       var _lastUsed =
           _topic.touched ?? DateTime.fromMillisecondsSinceEpoch(1414213562000);
       var tp = _topic.topicType;

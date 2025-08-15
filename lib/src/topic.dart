@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tinode/src/base_db.dart';
 
 import 'dart:async';
 import 'dart:math';
@@ -29,6 +30,8 @@ import 'package:tinode/src/models/values.dart';
 import 'package:tinode/src/services/auth.dart';
 import 'package:tinode/src/sorted-cache.dart';
 import 'package:tinode/src/topic-me.dart';
+
+import 'models/stored_message.dart';
 
 enum TopicType {
   me(0x01),
@@ -79,6 +82,10 @@ class Topic {
 
   dynamic payload;
 
+  bool get isPersisted {
+    return payload != null;
+  }
+
   /// Locally cached data
   ///
   /// Subscribed users, for tracking read/recv/msg notifications
@@ -98,6 +105,8 @@ class Topic {
 
   ///  User discovery tags
   List<String> tags = [];
+
+  StoredMessage? lastMessage;
 
   /// Message cache, sorted by message seq values, from old to new
   final SortedCache<DataMessage> _messages = SortedCache<DataMessage>(
@@ -150,6 +159,8 @@ class Topic {
   /// Logger service, responsible for logging content in different levels
   late LoggerService _loggerService;
 
+  late BaseDb _baseDb;
+
   /// This event will be triggered when a `data` message is received
   PublishSubject<DataMessage?> onData = PublishSubject<DataMessage?>();
 
@@ -195,6 +206,7 @@ class Topic {
     _loggerService = GetIt.I.get<LoggerService>();
     _tinodeService = GetIt.I.get<TinodeService>();
     _configService = GetIt.I.get<ConfigService>();
+    _baseDb = GetIt.I.get<BaseDb>();
   }
 
   // See if you have subscribed to this topic
@@ -220,6 +232,8 @@ class Topic {
     if (isSubscribed) {
       return Future.error(Exception('topic is already subscribed'));
     }
+
+    _persist();
 
     // Send subscribe message, handle async response.
     // If topic name is explicitly provided, use it. If no name, then it's a new group topic, use "new".
@@ -1080,6 +1094,11 @@ class Topic {
 
   String serializeTrusted() {
     return json.encode(trusted);
+  }
+
+  void _persist() {
+    if (isPersisted) return;
+    _baseDb.sqlStore!.topicAdd(this);
   }
 
   /// This topic is either deleted or unsubscribed from
