@@ -101,7 +101,6 @@ class TopicDb {
 
   // 从数据库行数据反序列化为TopicProto
   void deserializeTopic(Topic topic, Map<String, dynamic> row) {
-    BaseDb.log.info('TopicDb.insert: deserializeTopic.');
     var st = StoredTopic()
       ..id = row[columnId]
       ..status = BaseDbStatus.values.firstWhere(
@@ -114,8 +113,6 @@ class TopicDb {
       ..minLocalSeq = row[columnMinLocalSeq]
       ..maxLocalSeq = row[columnMaxLocalSeq]
       ..nextUnsentId = row[columnNextUnsentSeq];
-
-    BaseDb.log.info('TopicDb.insert: StoredTopic.');
 
     topic.updated = row[columnUpdated] != null
         ? DateTime.parse(row[columnUpdated])
@@ -130,24 +127,18 @@ class TopicDb {
     topic.clear = row[columnClear];
     topic.maxDel = row[columnMaxDel] ?? 0;
 
-    BaseDb.log.info('TopicDb.insert: topic.');
-
     if (topic is TopicMe) {
       topic.deserializeCreds(row[columnCreds]);
     }
 
-    BaseDb.log.info('TopicDb.insert: TopicMe.');
-    BaseDb.log.info('${row[columnTags]}');
-    if (row[columnTags]) {
+    if (row[columnTags] != null) {
       topic.tags = row[columnTags]!.toString().split(',');
     }
-    BaseDb.log.info('TopicDb.insert: decodeAcs.');
+
     final decodeAcs = AccessMode.deserialize(row[columnAccessMode]);
     if (decodeAcs != null) {
       topic.acs = decodeAcs;
     }
-
-    BaseDb.log.info('TopicDb.insert: defacs.');
 
     topic.defacs = DefAcs.deserialize(row[columnDefacs]);
     topic.public = json.decode(row[columnPub]);
@@ -219,7 +210,6 @@ class TopicDb {
 
   // 从行数据读取话题
   Topic? readOneFromRow(Map<String, dynamic> row) {
-    BaseDb.log.info('TopicDb.insert: readOneFromRow.');
     var topicName = row[columnTopic] as String?;
     if (topicName == null) return null;
 
@@ -232,15 +222,12 @@ class TopicDb {
   Future<int> insert(Topic _topic) async {
     var accountIdVal = _baseDb.account?.id;
     if (accountIdVal == null) {
-      BaseDb.log.error('TopicDb.insert: account id is not defined.');
       return -1;
     }
 
     try {
-      BaseDb.log.info('TopicDb.insert: readOne.');
       var res = await readOne(_topic.name);
       if (res != null) {
-        BaseDb.log.info('TopicDb.insert: read for cache.');
         _topic.payload = res.payload;
         return (res.payload as StoredTopic).id!;
       }
