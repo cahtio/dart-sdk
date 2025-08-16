@@ -402,6 +402,12 @@ class TinodeService {
       data.cred = params.cred;
     }
 
+    if (params.attachments != null) {
+      packet.extra = {'attachments': params.attachments};
+      what.add('attachments');
+    }
+
+
     if (what.isEmpty) {
       throw Exception('Invalid {set} parameters');
     }
