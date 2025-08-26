@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:tinode/src/base_db.dart';
+import 'package:tinode/src/db/subscriber_repository.dart';
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/access-mode.dart';
 
@@ -89,7 +89,7 @@ class TopicSubscription {
 
   int? unread;
 
-  dynamic payload;
+  SubscriptionStored? payload;
 
   String? get uniqueId {
     if (topic == null) return user;

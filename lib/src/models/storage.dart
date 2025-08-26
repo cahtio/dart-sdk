@@ -1,6 +1,6 @@
 import 'package:tinode/src/models/message.dart';
 import 'package:tinode/src/models/msg_range.dart';
-import 'package:tinode/src/models/stored_message.dart';
+import 'package:tinode/src/models/message_stored.dart';
 import 'package:tinode/src/models/user.dart';
 import 'package:tinode/tinode.dart';
 
@@ -58,19 +58,19 @@ abstract class Storage {
   Future<bool> userUpdate(User user);
 
   // Messages
-  Future<StoredMessage?> msgReceived({
+  Future<MessageStored?> msgReceived({
     required Topic topic,
     TopicSubscription? sub,
     DataMessage? msg,
   });
 
-  Future<StoredMessage?> msgSend({
+  Future<MessageStored?> msgSend({
     required Topic topic,
     required Drafty data,
     Map<String, dynamic>? head,
   });
 
-  Future<StoredMessage?> msgDraft({
+  Future<MessageStored?> msgDraft({
     required Topic topic,
     required Drafty data,
     Map<String, dynamic>? head,
@@ -154,27 +154,27 @@ abstract class Storage {
     required bool newer,
   });
 
-  Future<StoredMessage?> getMessageById(int dbMessageId);
+  Future<MessageStored?> getMessageById(int dbMessageId);
 
-  Future<StoredMessage?> getMessagePreviewById(int dbMessageId);
+  Future<MessageStored?> getMessagePreviewById(int dbMessageId);
 
-  Future<List<StoredMessage>?> getQueuedMessages(Topic topic);
+  Future<List<MessageStored>?> getQueuedMessages(Topic topic);
 
   Future<List<MsgRange>?> getQueuedMessageDeletes({
     required Topic topic,
     required bool hard,
   });
 
-  Future<List<StoredMessage>?> getLatestMessagePreviews();
+  Future<List<MessageStored>?> getLatestMessagePreviews();
 
-  Future<List<StoredMessage>?> getMessagePage({
+  Future<List<MessageStored>?> getMessagePage({
     required Topic topic,
     required int from,
     required int limit,
     required bool forward,
   });
 
-  Future<StoredMessage?> getMessageBySeq({
+  Future<MessageStored?> getMessageBySeq({
     required Topic topic,
     required int seqId,
   });

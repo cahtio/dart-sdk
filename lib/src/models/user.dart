@@ -77,7 +77,7 @@ class User {
       changed = true;
     }
     return changed;
-  }
+  } 
 }
 
 class InvalidUserException implements Exception {

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
-import 'package:tinode/src/base_db.dart';
 
 import 'dart:async';
 import 'dart:math';
@@ -21,6 +20,7 @@ import 'package:tinode/src/models/set-params.dart';
 import 'package:tinode/src/meta-get-builder.dart';
 import 'package:tinode/src/models/del-range.dart';
 import 'package:tinode/src/models/get-query.dart';
+import 'package:tinode/src/services/database_manager.dart';
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/services/tinode.dart';
 import 'package:tinode/src/models/message.dart';
@@ -31,7 +31,7 @@ import 'package:tinode/src/services/auth.dart';
 import 'package:tinode/src/sorted-cache.dart';
 import 'package:tinode/src/topic-me.dart';
 
-import 'models/stored_message.dart';
+import 'models/message_stored.dart';
 
 enum TopicType {
   me(0x01),
@@ -106,7 +106,7 @@ class Topic {
   ///  User discovery tags
   List<String> tags = [];
 
-  StoredMessage? lastMessage;
+  MessageStored? lastMessage;
 
   /// Message cache, sorted by message seq values, from old to new
   final SortedCache<DataMessage> _messages = SortedCache<DataMessage>(
@@ -159,7 +159,7 @@ class Topic {
   /// Logger service, responsible for logging content in different levels
   late LoggerService _loggerService;
 
-  late BaseDb _baseDb;
+  late DatabaseManager _databaseManager;
 
   /// This event will be triggered when a `data` message is received
   PublishSubject<DataMessage?> onData = PublishSubject<DataMessage?>();
@@ -206,7 +206,7 @@ class Topic {
     _loggerService = GetIt.I.get<LoggerService>();
     _tinodeService = GetIt.I.get<TinodeService>();
     _configService = GetIt.I.get<ConfigService>();
-    _baseDb = GetIt.I.get<BaseDb>();
+    _databaseManager = GetIt.I.get<DatabaseManager>();
   }
 
   // See if you have subscribed to this topic
@@ -1098,7 +1098,10 @@ class Topic {
 
   void _persist() {
     if (isPersisted) return;
-    _baseDb.sqlStore!.topicAdd(this);
+    _databaseManager.topicAdd(this);
+    if (isP2P()) {
+      // tinode?.updateUser(uid: self.name, desc: self.description)
+    }
   }
 
   /// This topic is either deleted or unsubscribed from

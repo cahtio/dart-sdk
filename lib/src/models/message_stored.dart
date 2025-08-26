@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/rendering.dart';
-import 'package:tinode/src/base_db.dart';
-import 'package:tinode/src/models/server-messages.dart';
+import 'package:tinode/src/db/repository.dart';
 
-class StoredMessage extends DataMessage {
+import 'package:tinode/src/models/server-messages.dart';
+import 'package:tinode/src/services/database_manager.dart';
+
+class MessageStored extends DataMessage {
   var msgId = 0;
 
   int get seqId => seq ?? 0;
@@ -12,24 +14,24 @@ class StoredMessage extends DataMessage {
   int? topicId;
   int? userId;
 
-  BaseDbStatus? dbStatus;
+  RepositoryStatus? dbStatus;
 
   int? get status => dbStatus?.value;
 
-  bool get isDraft => dbStatus == BaseDbStatus.draft;
+  bool get isDraft => dbStatus == RepositoryStatus.draft;
 
-  bool get isReady => dbStatus == BaseDbStatus.queued;
+  bool get isReady => dbStatus == RepositoryStatus.queued;
 
   bool get isDeleted =>
-      dbStatus == BaseDbStatus.deletedHard ||
-      dbStatus == BaseDbStatus.deletedSoft ||
-      dbStatus == BaseDbStatus.deletedSynced;
+      dbStatus == RepositoryStatus.deletedHard ||
+      dbStatus == RepositoryStatus.deletedSoft ||
+      dbStatus == RepositoryStatus.deletedSynced;
 
-  bool get isSynced => dbStatus == BaseDbStatus.synced;
+  bool get isSynced => dbStatus == RepositoryStatus.synced;
 
   /// 消息尚未交付到服务器
   bool get isPending =>
-      dbStatus == null || (dbStatus!.index <= BaseDbStatus.sending.index);
+      dbStatus == null || (dbStatus!.index <= RepositoryStatus.sending.index);
 
   /// 如果消息是从其他主题转发的则为true
   bool get isForwarded {
@@ -45,7 +47,7 @@ class StoredMessage extends DataMessage {
   }
 
   /// 如果账户所有者是消息的作者则为true
-  bool get isMine => BaseDb.sharedInstance.isMe(from);
+  bool get isMine => DatabaseManager.instance.isMe(from);
 
   /// 消息内容的缓存表示（富文本）
   AttributedString? cachedContent;
@@ -53,9 +55,9 @@ class StoredMessage extends DataMessage {
   /// 消息预览的缓存表示（富文本）
   AttributedString? cachedPreview;
 
-  StoredMessage();
+  MessageStored();
 
-  StoredMessage.fromDataMessage(DataMessage message)
+  MessageStored.fromDataMessage(DataMessage message)
     : super(
         topic: message.topic,
         from: message.from,
@@ -67,9 +69,9 @@ class StoredMessage extends DataMessage {
         hi: message.hi,
       );
 
-  StoredMessage.fromDataMessageWithStatus(
+  MessageStored.fromDataMessageWithStatus(
     DataMessage message,
-    BaseDbStatus status,
+    RepositoryStatus status,
   ) : super(
         topic: message.topic,
         from: message.from,
@@ -84,11 +86,11 @@ class StoredMessage extends DataMessage {
   }
 
   bool isDeletedWithHard(bool hard) => hard
-      ? dbStatus == BaseDbStatus.deletedHard
-      : dbStatus == BaseDbStatus.deletedSoft;
+      ? dbStatus == RepositoryStatus.deletedHard
+      : dbStatus == RepositoryStatus.deletedSoft;
 
-  StoredMessage copyOf() {
-    var copy = StoredMessage.fromDataMessage(this);
+  MessageStored copyOf() {
+    var copy = MessageStored.fromDataMessage(this);
     copy.msgId = msgId;
     copy.topicId = topicId;
     copy.userId = userId;
