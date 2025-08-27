@@ -1025,6 +1025,7 @@ class Topic {
         }
         user = _updateCachedUser(sub.user!, sub)!;
       } else {
+        _databaseManager.subDelete(this, sub);
         _users.remove(sub.user);
         user = sub;
       }
@@ -1240,6 +1241,15 @@ class Topic {
     ranges.map((gap) {
       _messages.put([gap]);
     });
+  }
+
+  Future<int> _loadSubs() async {
+    final loaded = await _databaseManager.getSubscriptions(this);
+    if (loaded == null) return 0;
+    for (final sub in loaded) {
+      _users[sub.user!] = sub;
+    }
+    return loaded.length;
   }
 
   DateTime get lastDescUpdate {

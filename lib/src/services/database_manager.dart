@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:get_it/get_it.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,6 +10,7 @@ import 'package:tinode/src/db/subscriber_repository.dart';
 import 'package:tinode/src/db/topic_repository.dart';
 import 'package:tinode/src/db/user_repository.dart';
 import 'package:tinode/src/models/message_stored.dart';
+import 'package:tinode/src/models/topic-subscription.dart';
 
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/topic.dart';
@@ -155,13 +158,25 @@ class DatabaseManager {
     return topicRepository.insert(db, topic);
   }
 
-  // public func topicAdd(topic: TopicProto) -> Int64 {
-  // if let st = topic.payload as? StoredTopic {
-  // return st.id ?? 0
-  // }
-  // return self.dbh?.topicDb?.insert(topic: topic) ?? 0
-  // }
-  // public func getLatestMessagePreviews() -> [Message]? {
-  // return BaseDb.sharedInstance.messageDb?.queryLatest()
-  // }
+  Future<bool> subDelete(Topic topic, TopicSubscription sub) async {
+    if (sub.payload != null &&
+        sub.payload!.id != null &&
+        sub.payload!.id! > 0) {
+      final db = await database;
+      return subscriberRepository.delete(db, sub.payload!.id!);
+    } else {
+      return false;
+    }
+  }
+
+  Future<List<TopicSubscription>?> getSubscriptions(Topic topic) async {
+    if (topic.payload is TopicStored) {
+      final ts = topic.payload as TopicStored;
+      if (ts.id == null) return null;
+      final db = await database;
+      return subscriberRepository.readAll(db, ts.id!);
+    } else {
+      return null;
+    }
+  }
 }
