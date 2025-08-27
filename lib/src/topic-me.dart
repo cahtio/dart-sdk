@@ -12,6 +12,7 @@ import 'package:tinode/src/services/cache-manager.dart';
 import 'package:tinode/src/models/contact-update.dart';
 import 'package:tinode/src/models/access-mode.dart';
 import 'package:tinode/src/models/credential.dart';
+import 'package:tinode/src/services/database_manager.dart';
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/services/tinode.dart';
 import 'package:tinode/src/services/tools.dart';
@@ -44,10 +45,13 @@ class TopicMe extends Topic {
   /// Logger service, responsible for logging content in different levels
   late LoggerService _loggerService;
 
+  late DatabaseManager _databaseManager;
+
   TopicMe() : super(topic_names.TOPIC_ME) {
     _cacheManager = GetIt.I.get<CacheManager>();
     _tinodeService = GetIt.I.get<TinodeService>();
     _loggerService = GetIt.I.get<LoggerService>();
+    _databaseManager = GetIt.I.get<DatabaseManager>();
   }
 
   /// Override the original Topic.processMetaDesc.
@@ -91,7 +95,7 @@ class TopicMe extends Topic {
 
   /// Override the original Topic.processMetaSub
   @override
-  void processMetaSub(List<TopicSubscription> subscriptions) {
+  void processMetaSub(List<TopicSubscription> subscriptions) async {
     for (var sub in subscriptions) {
       var topicName = sub.topic;
       // Don't show 'me' and 'fnd' topics in the list of contacts.
@@ -100,58 +104,72 @@ class TopicMe extends Topic {
         continue;
       }
 
+      final topic = _cacheManager.getTopic(topicName!);
       var cont = TopicSubscription();
-      if (sub.deleted != null) {
-        _contacts.remove(topicName);
-        _cacheManager.delete('topic', topicName ?? '');
-      } else {
-        // Ensure the values are defined and are integers.
-        if (sub.seq != null) {
-          sub.seq = sub.seq ?? 0;
-          sub.recv = sub.recv ?? 0;
-          sub.read = sub.read ?? 0;
-          sub.unread = (sub.seq ?? 0) - (sub.read ?? 0);
-        }
 
-        var cached = _contacts[topicName];
-        if (cached != null) {
-          cached.acs = sub.acs ?? cached.acs;
-          cached.clear = sub.clear ?? cached.clear;
-          cached.created = sub.created ?? cached.created;
-          cached.deleted = cached.deleted ?? cached.deleted;
-          cached.mode = sub.mode ?? cached.mode;
-          cached.noForwarding = sub.noForwarding ?? cached.noForwarding;
-          cached.online = sub.online ?? cached.online;
-          cached.private = sub.private ?? cached.private;
-          cached.public = sub.public ?? cached.public;
-          cached.read = sub.read ?? cached.read;
-          cached.recv = sub.recv ?? cached.recv;
-          cached.seen = sub.seen ?? cached.seen;
-          cached.seen = sub.seen ?? cached.seen;
-          cached.topic = sub.topic ?? cached.topic;
-          cached.touched = sub.touched ?? cached.touched;
-          cached.updated = sub.updated ?? cached.updated;
-          cached.user = sub.user ?? cached.user;
+      if (topic != null) {
+        if (sub.deleted != null) {
+          if (topic.deleted) {
+            await _databaseManager.topicDelete(topic, true);
+          } else {
+            topic.deleted = true;
+            await _databaseManager.topicDelete(topic, false);
+          }
+
+          _contacts.remove(topicName);
+          _cacheManager.delete('topic', topicName ?? '');
         } else {
-          cached = sub;
-          _contacts[(topicName ?? '')] = sub;
-        }
-        cont = cached;
+          // Ensure the values are defined and are integers.
+          if (sub.seq != null) {
+            sub.seq = sub.seq ?? 0;
+            sub.recv = sub.recv ?? 0;
+            sub.read = sub.read ?? 0;
+            sub.unread = (sub.seq ?? 0) - (sub.read ?? 0);
+          }
 
-        if (topicName != null) {
+          var cached = _contacts[topicName];
+          if (cached != null) {
+            cached.acs = sub.acs ?? cached.acs;
+            cached.clear = sub.clear ?? cached.clear;
+            cached.created = sub.created ?? cached.created;
+            cached.deleted = cached.deleted ?? cached.deleted;
+            cached.mode = sub.mode ?? cached.mode;
+            cached.noForwarding = sub.noForwarding ?? cached.noForwarding;
+            cached.online = sub.online ?? cached.online;
+            cached.private = sub.private ?? cached.private;
+            cached.public = sub.public ?? cached.public;
+            cached.read = sub.read ?? cached.read;
+            cached.recv = sub.recv ?? cached.recv;
+            cached.seen = sub.seen ?? cached.seen;
+            cached.seen = sub.seen ?? cached.seen;
+            cached.topic = sub.topic ?? cached.topic;
+            cached.touched = sub.touched ?? cached.touched;
+            cached.updated = sub.updated ?? cached.updated;
+            cached.user = sub.user ?? cached.user;
+          } else {
+            cached = sub;
+            _contacts[(topicName ?? '')] = sub;
+          }
+          cont = cached;
+
+          // if (topicName != null) {
           if (Tools.isP2PTopicName(topicName)) {
             _cacheManager.putUser(topicName, cont);
           }
-        }
+          // }
 
-        // Notify topic of the update if it's an external update.
-        if (sub.noForwarding == false || sub.noForwarding == null) {
-          var topic = _tinodeService.getTopic(topicName);
-          if (topic != null) {
-            sub.noForwarding = true;
-            topic.processMetaDesc(sub.asDesc());
+          // Notify topic of the update if it's an external update.
+          if (sub.noForwarding == false || sub.noForwarding == null) {
+            var topic = _tinodeService.getTopic(topicName);
+            if (topic != null) {
+              sub.noForwarding = true;
+              topic.processMetaDesc(sub.asDesc());
+            }
           }
         }
+      } else {
+        final newTopic = _tinodeService.getTopic(topicName);
+        await newTopic?.persist();
       }
 
       onMetaSub.add(cont);

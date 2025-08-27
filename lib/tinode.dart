@@ -187,7 +187,7 @@ class Tinode {
     _futureManager.startCheckingExpiredFutures();
   }
 
-  _loadTopics() async {
+  Future<void> _loadTopics() async {
     if (_topicsLoaded) return;
     final allTopics = await _databaseManager.topicGetAll();
     if (allTopics == null) return;

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:tinode/src/db/account_repository.dart';
 import 'package:tinode/src/db/message_repository.dart';
+import 'package:tinode/src/db/repository.dart';
 import 'package:tinode/src/db/subscriber_repository.dart';
 import 'package:tinode/src/db/topic_repository.dart';
 import 'package:tinode/src/db/user_repository.dart';
@@ -131,9 +132,13 @@ class DatabaseManager {
   }
 
   Future<List<Topic>?> topicGetAll() async {
+    _logInfo('topicGetAll');
     final db = await database;
     final rows = await topicRepository.query(db);
-    if (rows == null) return null;
+    if (rows == null) {
+      _logError('topicGetAll rows is null');
+      return null;
+    }
     final results = List<Topic>.empty(growable: true);
     for (final r in rows) {
       final t = topicRepository.readOneFromRow(r);
@@ -141,17 +146,21 @@ class DatabaseManager {
         results.add(t);
       }
     }
+    _logInfo('topicGetAll results length: ${results.length}');
     return results;
   }
 
   Future<List<MessageStored>?> getLatestMessagePreviews() async {
+    _logInfo('getLatestMessagePreviews');
     final db = await database;
     return await messageRepository.queryLatest(db);
   }
 
   Future<int> topicAdd(Topic topic) async {
+    _logInfo('topicAdd name: ${topic.name}');
     if (topic.payload is TopicStored) {
       final ts = topic.payload as TopicStored;
+      _logInfo('topicAdd did saved id: ${ts.id}');
       return ts.id ?? 0;
     }
     final db = await database;
@@ -159,6 +168,7 @@ class DatabaseManager {
   }
 
   Future<bool> subDelete(Topic topic, TopicSubscription sub) async {
+    _logInfo('subDelete name: ${topic.name}');
     if (sub.payload != null &&
         sub.payload!.id != null &&
         sub.payload!.id! > 0) {
@@ -170,6 +180,7 @@ class DatabaseManager {
   }
 
   Future<List<TopicSubscription>?> getSubscriptions(Topic topic) async {
+    _logInfo('getSubscriptions');
     if (topic.payload is TopicStored) {
       final ts = topic.payload as TopicStored;
       if (ts.id == null) return null;
@@ -178,5 +189,62 @@ class DatabaseManager {
     } else {
       return null;
     }
+  }
+
+  Future<int> subAdd(Topic topic, TopicSubscription sub) async {
+    _logInfo('subAdd');
+    if (topic.payload is TopicStored) {
+      final ts = topic.payload as TopicStored;
+      if (ts.id == null) return 0;
+      final db = await database;
+      return subscriberRepository.insert(
+        db,
+        ts.id!,
+        RepositoryStatus.synced,
+        sub,
+      );
+    } else {
+      return 0;
+    }
+  }
+
+  Future<bool> subUpdate(Topic topic, TopicSubscription sub) async {
+    _logInfo('subUpdate');
+    if (sub.payload?.id == null || sub.payload!.id! > 0) {
+      _logError('subUpdate sub payload id is null or zero');
+      return false;
+    }
+    final db = await database;
+    return subscriberRepository.update(db, sub);
+  }
+
+  Future<bool> topicDelete(Topic topic, bool hard) async {
+    _logInfo('topicDelete');
+    if (topic.payload is! TopicStored ||
+        (topic.payload as TopicStored).id == null) {
+      _logError('topicDelete topic payload error');
+      return false;
+    }
+    ;
+    final topicId = (topic.payload as TopicStored).id!;
+    final db = await database;
+    if (hard) {
+      await db.transaction((txn) async {
+        await messageRepository.deleteAll(txn, topicId);
+        await subscriberRepository.deleteForTopic(txn, topicId);
+        await topicRepository.delete(txn, topicId);
+      });
+    } else {
+      await topicRepository.markDeleted(db, topicId);
+    }
+    return true;
+  }
+
+  void _logInfo(String msg) {
+    _loggerService.log(msg, prefix: LogPrefix.db);
+  }
+
+  void _logError(String msg) {
+    _loggerService.error(msg, prefix: LogPrefix.db);
   }
 }

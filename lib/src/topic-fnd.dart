@@ -1,16 +1,22 @@
+import 'package:get_it/get_it.dart';
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
 import 'package:tinode/src/models/topic-subscription.dart';
 import 'package:tinode/src/models/server-messages.dart';
 import 'package:tinode/src/models/set-params.dart';
 import 'package:tinode/src/models/message.dart';
+import 'package:tinode/src/services/database_manager.dart';
 import 'package:tinode/src/topic.dart';
 
 /// special case of Topic for searching for contacts and group topics
 class TopicFnd extends Topic {
+  late DatabaseManager _databaseManager;
+
   // List of users and topics uid or topic_name -> Contact object)
   Map<String, TopicSubscription> _contacts = {};
 
-  TopicFnd() : super(topic_names.TOPIC_FND);
+  TopicFnd() : super(topic_names.TOPIC_FND) {
+    _databaseManager = GetIt.I.get<DatabaseManager>();
+  }
 
   /// Override the original Topic.processMetaSub
   @override

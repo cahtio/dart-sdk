@@ -37,6 +37,9 @@ class CacheManager {
     _cache.remove(type + ':' + name);
   }
 
+  bool containsKey(String type, String name) =>
+      _cache.containsKey(type + ':' + name);
+
   /// Executes a function for each element in cache, just like map method on `Map`
   void map(MapEntry Function(String, dynamic) function) {
     _cache.map(function);
@@ -56,6 +59,8 @@ class CacheManager {
   void deleteUser(String userId) {
     return delete('user', userId);
   }
+
+  bool containsUser(String userId) => containsKey('user', userId);
 
   Topic? getTopic(String name) {
     return get('topic', name);

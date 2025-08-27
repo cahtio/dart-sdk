@@ -233,7 +233,7 @@ class Topic {
       return Future.error(Exception('topic is already subscribed'));
     }
 
-    _persist();
+    await persist();
 
     // Send subscribe message, handle async response.
     // If topic name is explicitly provided, use it. If no name, then it's a new group topic, use "new".
@@ -1008,7 +1008,7 @@ class Topic {
   }
 
   /// Called by `Tinode` when meta.sub is received or in response to received
-  void processMetaSub(List<TopicSubscription> subscriptions) {
+  void processMetaSub(List<TopicSubscription> subscriptions) async {
     for (var sub in subscriptions) {
       TopicSubscription user;
       if (sub.deleted == null) {
@@ -1023,9 +1023,15 @@ class Topic {
             ),
           );
         }
+        final hasCache = _cacheManager.containsUser(sub.user!);
         user = _updateCachedUser(sub.user!, sub)!;
+        if (hasCache) {
+          await _databaseManager.subUpdate(this, user);
+        } else {
+          await _databaseManager.subAdd(this, user);
+        }
       } else {
-        _databaseManager.subDelete(this, sub);
+        await _databaseManager.subDelete(this, sub);
         _users.remove(sub.user);
         user = sub;
       }
@@ -1097,9 +1103,9 @@ class Topic {
     return json.encode(trusted);
   }
 
-  void _persist() {
+  Future<void> persist() async {
     if (isPersisted) return;
-    _databaseManager.topicAdd(this);
+    await _databaseManager.topicAdd(this);
     if (isP2P()) {
       // tinode?.updateUser(uid: self.name, desc: self.description)
     }
