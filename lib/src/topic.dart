@@ -291,7 +291,11 @@ class Topic {
       _cacheManager.delete('topic', name ?? '');
       _gone();
     }
-    return CtrlMessage.fromMessage(ctrl);
+    if (ctrl is CtrlMessage) {
+      return ctrl;
+    } else {
+      return CtrlMessage.fromMessage(ctrl);
+    }
   }
 
   /// Request topic metadata from the serve
