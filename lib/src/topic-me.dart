@@ -307,6 +307,8 @@ class TopicMe extends Topic {
           getMeta(startMetaQuery().withOneSub(null, pres.src).build());
           // Create a dummy entry to catch online status update.
           _contacts[pres.src ?? ''] = TopicSubscription(touched: DateTime.now(), topic: pres.src, online: false, acs: acs);
+          // Immediately notify listeners with updated contacts snapshot so UI can reflect the new contact.
+          onSubsUpdated.add(_contacts.values.toList());
         }
       } else if (pres.what == 'tags') {
         getMeta(startMetaQuery().withTags().build());

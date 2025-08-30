@@ -151,9 +151,13 @@ class TinodeService {
 
     onPresMessage.add(pres);
 
-    Topic? topic = pres.topic != null
-        ? _cacheManager.get('topic', pres.topic ?? '')
-        : null;
+    Topic? topic;
+    if (pres.topic != null && pres.topic!.isNotEmpty) {
+      // Try get from cache first.
+      topic = _cacheManager.get('topic', pres.topic!);
+      // Auto-instantiate topic (e.g. 'me') if it's not yet cached so presence is not lost.
+      topic ??= getTopic(pres.topic!);
+    }
     if (topic != null) {
       topic.routePres(pres);
     }
