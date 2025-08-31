@@ -1116,7 +1116,7 @@ class Topic {
     // Check for missing messages at the end.
     // All messages could be missing or it could be a new topic with no messages.
     var last = _messages.length > 0 ? _messages.getLast() : null;
-    var maxSeq = max(seq!, _maxSeq);
+    var maxSeq = max(last?.seq ?? 0, _maxSeq);
     if ((maxSeq > 0 && last == null) ||
         (last != null &&
             (((last.hi != null && last.hi! > 0) ? last.hi : last.seq)! <
