@@ -144,6 +144,10 @@ class Topic {
   String? status;
   int? seq;
 
+  Seen? seen;
+
+  bool online = false;
+
   /// Authentication service, responsible for managing credentials and user id
   late AuthService _authService;
 
@@ -193,6 +197,24 @@ class Topic {
   Topic(String topicName) {
     _resolveDependencies();
     name = topicName;
+  }
+
+  Topic.fromSubscription(TopicSubscription sub) {
+    _resolveDependencies();
+    name = sub.topic;
+    updated = sub.updated;
+    touched = sub.touched;
+    if (sub.acs != null) {
+      acs = sub.acs!;
+    }
+    seq = sub.seq;
+    read = sub.read;
+    recv = sub.recv;
+    clear = sub.clear;
+    public = sub.public;
+    private = sub.private;
+    trusted = sub.trusted;
+    seen = sub.seen;
   }
 
   static bool isNewByName(String name) {
@@ -351,7 +373,7 @@ class Topic {
       _cacheManager.delete('topic', name ?? '');
       _gone();
     }
-    return CtrlMessage.fromMessage(ctrl);
+    return ctrl is CtrlMessage ? ctrl : CtrlMessage.fromMessage(ctrl);
   }
 
   /// Request topic metadata from the serve

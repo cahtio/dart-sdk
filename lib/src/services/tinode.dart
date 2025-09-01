@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 
 import 'package:tinode/src/models/packet-types.dart' as packet_types;
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
+import 'package:tinode/src/models/topic-subscription.dart';
 import 'package:tinode/src/services/packet-generator.dart';
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/services/future-manager.dart';
@@ -352,6 +353,18 @@ class TinodeService {
     return Topic(peerUserId);
   }
 
+  Topic newTopicWithSubscription(TopicSubscription sub) {
+    if (sub.topic == topic_names.TOPIC_ME) {
+      return TopicMe();
+    }
+    if (sub.topic == topic_names.TOPIC_FND) {
+      return TopicFnd();
+    }
+    final topic = Topic.fromSubscription(sub);
+    topic.online = sub.online ?? false;
+    return Topic.fromSubscription(sub);
+  }
+
   /// Create message draft without sending it to the server
   Message createMessage(String topicName, dynamic data, bool? echo) {
     echo ??= true;
@@ -406,7 +419,6 @@ class TinodeService {
       packet.extra = {'attachments': params.attachments};
       what.add('attachments');
     }
-
 
     if (what.isEmpty) {
       throw Exception('Invalid {set} parameters');

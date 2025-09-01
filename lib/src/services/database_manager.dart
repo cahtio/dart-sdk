@@ -12,6 +12,7 @@ import 'package:tinode/src/db/topic_repository.dart';
 import 'package:tinode/src/db/user_repository.dart';
 import 'package:tinode/src/models/message_stored.dart';
 import 'package:tinode/src/models/topic-subscription.dart';
+import 'package:tinode/src/models/user.dart';
 
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/topic.dart';
@@ -112,6 +113,10 @@ class DatabaseManager {
     _loggerService.log('Creating SQLite db tables.', prefix: LogPrefix.db);
 
     await accountRepository.createTable(db);
+    await userRepository.createTable(db);
+    await topicRepository.createTable(db);
+    await subscriberRepository.createTable(db);
+    await messageRepository.createTable(db);
   }
 
   Future<void> _dropTables(Database db) async {
@@ -119,16 +124,28 @@ class DatabaseManager {
       'Dropping local store (SQLite db).',
       prefix: LogPrefix.db,
     );
-    // await messageDb?.destroyTable();
-    // await subscriberDb?.destroyTable();
-    // await topicDb?.destroyTable();
-    // await userDb?.destroyTable();
+    await messageRepository.destroyTable(db);
+    await subscriberRepository.destroyTable(db);
+    await topicRepository.destroyTable(db);
+    await userRepository.destroyTable(db);
     await accountRepository.destroyTable(db);
   }
 
   bool isMe(String? uid) {
     final acctUid = account?.uid;
     return uid != null && acctUid != null && uid == acctUid;
+  }
+
+  Future<void> setUid(String? uid) async {
+    if (uid == null) {
+      account = null;
+      return;
+    }
+    final db = await database;
+    if (account != null) {
+      await accountRepository.deactivateAll(db);
+    }
+    account = await accountRepository.addOrActivateAccount(db, uid);
   }
 
   Future<List<Topic>?> topicGetAll() async {
@@ -238,6 +255,11 @@ class DatabaseManager {
       await topicRepository.markDeleted(db, topicId);
     }
     return true;
+  }
+
+  Future<bool> updateUser(String uid, User user) async {
+    final db = await database;
+    return userRepository.updateUser(db, user);
   }
 
   void _logInfo(String msg) {

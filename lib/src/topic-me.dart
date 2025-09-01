@@ -154,6 +154,7 @@ class TopicMe extends Topic {
 
           // if (topicName != null) {
           if (Tools.isP2PTopicName(topicName)) {
+            // await _databaseManager.updateUser(topicName, cont);
             _cacheManager.putUser(topicName, cont);
           }
           // }
@@ -168,8 +169,8 @@ class TopicMe extends Topic {
           }
         }
       } else {
-        final newTopic = _tinodeService.getTopic(topicName);
-        await newTopic?.persist();
+        final newTopic = _tinodeService.newTopicWithSubscription(sub);
+        await newTopic.persist();
       }
 
       onMetaSub.add(cont);

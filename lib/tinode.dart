@@ -6,6 +6,7 @@ import 'dart:ffi';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tinode/src/models/concurrent_map.dart';
 
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
 import 'package:tinode/src/models/server-configuration.dart';
@@ -121,6 +122,8 @@ class Tinode {
 
   DateTime? _topicsUpdated;
 
+  final _topics = ConcurrentMap<String, Topic>();
+
   DateTime? get topicsUpdated => _topicsUpdated;
 
   /// Creates an instance of Tinode interface to interact with tinode server using websocket
@@ -140,6 +143,31 @@ class Tinode {
     _loadTopics();
   }
 
+  Future<List<Topic>> getTopics() async {
+    final values = await _topics.values;
+    return values.toList();
+  }
+
+  Future<List<Topic>> getFilteredTopics({bool Function(Topic)? filter}) async {
+    if (filter == null) {
+      final values = await _topics.values;
+      return values.toList();
+    }
+    final result = List<Topic>.empty(growable: true);
+    final values = await _topics.values;
+    values.forEach((topic) {
+      if (filter(topic)) {
+        result.add(topic);
+      }
+    });
+    result.sort(
+      (a, b) => (a.touched ?? DateTime.fromMicrosecondsSinceEpoch(0)).compareTo(
+        b.touched ?? DateTime.fromMicrosecondsSinceEpoch(0),
+      ),
+    );
+    return result;
+  }
+
   /// Register services in dependency injection container
   void _registerDependencies(ConnectionOptions options, bool loggerEnabled) {
     var registered = GetIt.I.isRegistered<ConfigService>();
@@ -147,13 +175,13 @@ class Tinode {
     if (!registered) {
       GetIt.I.registerSingleton<ConfigService>(ConfigService(loggerEnabled));
       GetIt.I.registerSingleton<LoggerService>(LoggerService());
+      GetIt.I.registerSingleton(DatabaseManager());
       GetIt.I.registerSingleton<AuthService>(AuthService());
       GetIt.I.registerSingleton<ConnectionService>(ConnectionService(options));
       GetIt.I.registerSingleton<FutureManager>(FutureManager());
       GetIt.I.registerSingleton<PacketGenerator>(PacketGenerator());
       GetIt.I.registerSingleton<CacheManager>(CacheManager());
       GetIt.I.registerSingleton<TinodeService>(TinodeService());
-      GetIt.I.registerSingleton(DatabaseManager());
     }
   }
 
@@ -192,7 +220,8 @@ class Tinode {
     final allTopics = await _databaseManager.topicGetAll();
     if (allTopics == null) return;
     for (final t in allTopics) {
-      _cacheManager.putTopic(t);
+      // _cacheManager.putTopic(t);
+      await _topics.set(t.name!, t);
       if (t.updated != null &&
           (_topicsUpdated ?? DateTime.fromMicrosecondsSinceEpoch(0)).compareTo(
                 t.updated!,
@@ -206,7 +235,8 @@ class Tinode {
     if (messages != null) {
       for (final m in messages) {
         if (m.topic != null) {
-          final topic = _cacheManager.getTopic(m.topic!);
+          // final topic = _cacheManager.getTopic(m.topic!);
+          final topic = await _topics.get(m.topic!);
           topic?.lastMessage = m;
         }
       }
