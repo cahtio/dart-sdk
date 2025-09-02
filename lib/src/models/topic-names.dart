@@ -1,5 +1,5 @@
 const TOPIC_NEW = 'new';
-const TOPIC_CHANNEL_NEW = "nch";
+const TOPIC_CHANNEL_NEW = 'nch';
 const TOPIC_ME = 'me';
 const TOPIC_FND = 'fnd';
 const TOPIC_SYS = 'sys';
@@ -7,6 +7,6 @@ const USER_NEW = 'new';
 const TOPIC_CHAN = 'chn';
 const TOPIC_NEW_CHAN = 'nch';
 const TOPIC_SLF = 'slf';
-const TOPIC_GRP_PREFIX = "grp";
-const TOPIC_USR_PREFIX = "usr";
-const TOPIC_CHN_PREFIX = "chn";
+const TOPIC_GRP_PREFIX = 'grp';
+const TOPIC_USR_PREFIX = 'usr';
+const TOPIC_CHN_PREFIX = 'chn';

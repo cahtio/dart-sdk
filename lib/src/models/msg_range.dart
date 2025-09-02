@@ -80,7 +80,7 @@ class MsgRange implements Comparable<MsgRange> {
     final result = <MsgRange>[];
     var current = MsgRange.id(sortedList.first);
 
-    for (int i = 1; i < sortedList.length; i++) {
+    for (var i = 1; i < sortedList.length; i++) {
       final id = sortedList[i];
       if (!current._extend(id)) {
         current._normalize();
@@ -146,7 +146,7 @@ class MsgRange implements Comparable<MsgRange> {
 
     final gaps = <MsgRange>[];
 
-    for (int i = 1; i < ranges.length; i++) {
+    for (var i = 1; i < ranges.length; i++) {
       if (ranges[i - 1].upper < ranges[i].lower) {
         // 发现间隙
         gaps.add(MsgRange.withBounds(ranges[i - 1].upper, ranges[i].lower));

@@ -1,4 +1,3 @@
-import 'package:tinode/src/models/message.dart';
 import 'package:tinode/src/models/msg_range.dart';
 import 'package:tinode/src/models/message_stored.dart';
 import 'package:tinode/src/models/user.dart';

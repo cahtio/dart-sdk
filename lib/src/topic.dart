@@ -370,7 +370,7 @@ class Topic {
     var ctrl = await _tinodeService.leave(name ?? '', unsubscribe);
     resetSubscription();
     if (unsubscribe) {
-      _cacheManager.delete('topic', name ?? '');
+      _cacheManager.deleteTopic(name ?? '');
       _gone();
     }
     return ctrl is CtrlMessage ? ctrl : CtrlMessage.fromMessage(ctrl);
@@ -1271,14 +1271,14 @@ class Topic {
     });
   }
 
-  Future<int> _loadSubs() async {
-    final loaded = await _databaseManager.getSubscriptions(this);
-    if (loaded == null) return 0;
-    for (final sub in loaded) {
-      _users[sub.user!] = sub;
-    }
-    return loaded.length;
-  }
+  // Future<int> _loadSubs() async {
+  //   final loaded = await _databaseManager.getSubscriptions(this);
+  //   if (loaded == null) return 0;
+  //   for (final sub in loaded) {
+  //     _users[sub.user!] = sub;
+  //   }
+  //   return loaded.length;
+  // }
 
   DateTime get lastDescUpdate {
     return _lastDescUpdate;

@@ -90,14 +90,14 @@ class TinodeService {
     }
 
     if (ctrl.code == 205 && ctrl.text == 'evicted') {
-      Topic? topic = _cacheManager.get('topic', ctrl.topic ?? '');
+      var topic = _cacheManager.getTopic(ctrl.topic ?? '');
       if (topic != null) {
         topic.resetSubscription();
       }
     }
 
     if (ctrl.params != null && ctrl.params['what'] == 'data') {
-      Topic? topic = _cacheManager.get('topic', ctrl.topic ?? '');
+      final topic = _cacheManager.getTopic(ctrl.topic ?? '');
       if (topic != null) {
         var count = ctrl.params['count'];
         topic.allMessagesReceived(count ?? 0);
@@ -105,7 +105,7 @@ class TinodeService {
     }
 
     if (ctrl.params != null && ctrl.params['what'] == 'sub') {
-      Topic? topic = _cacheManager.get('topic', ctrl.topic ?? '');
+      final topic = _cacheManager.getTopic(ctrl.topic ?? '');
       if (topic != null) {
         topic.processMetaSub([]);
       }
@@ -120,7 +120,7 @@ class TinodeService {
 
     onMetaMessage.add(meta);
 
-    Topic? topic = _cacheManager.get('topic', meta.topic ?? '');
+    var topic = _cacheManager.getTopic(meta.topic ?? '');
     if (topic != null) {
       topic.routeMeta(meta);
     }
@@ -138,7 +138,7 @@ class TinodeService {
 
     onDataMessage.add(data);
 
-    Topic? topic = _cacheManager.get('topic', data.topic ?? '');
+    var topic = _cacheManager.getTopic(data.topic ?? '');
     if (topic != null) {
       topic.routeData(data);
     }
@@ -152,8 +152,8 @@ class TinodeService {
 
     onPresMessage.add(pres);
 
-    Topic? topic = pres.topic != null
-        ? _cacheManager.get('topic', pres.topic ?? '')
+    var topic = pres.topic != null
+        ? _cacheManager.getTopic(pres.topic ?? '')
         : null;
     if (topic != null) {
       topic.routePres(pres);
@@ -166,7 +166,7 @@ class TinodeService {
       return;
     }
 
-    Topic? topic = _cacheManager.get('topic', info.topic ?? '');
+    var topic = _cacheManager.getTopic(info.topic ?? '');
     if (topic != null) {
       topic.routeInfo(info);
     }
@@ -322,7 +322,7 @@ class TinodeService {
   }
 
   Topic? getTopic(String? topicName) {
-    Topic? topic = _cacheManager.get('topic', topicName ?? '');
+    var topic = _cacheManager.getTopic(topicName ?? '');
     if (topic == null && topicName != null) {
       if (topicName == topic_names.TOPIC_ME) {
         topic = TopicMe();
@@ -331,7 +331,7 @@ class TinodeService {
       } else {
         topic = Topic(topicName);
       }
-      _cacheManager.put('topic', topicName, topic);
+      _cacheManager.putTopic(topicName, topic);
     }
     return topic;
   }
@@ -362,7 +362,7 @@ class TinodeService {
     }
     final topic = Topic.fromSubscription(sub);
     topic.online = sub.online ?? false;
-    return Topic.fromSubscription(sub);
+    return topic;
   }
 
   /// Create message draft without sending it to the server
@@ -447,7 +447,7 @@ class TinodeService {
     data.hard = hard;
     packet.data = data;
     var ctrl = await _send(packet);
-    _cacheManager.delete('topic', topicName);
+    _cacheManager.deleteTopic(topicName);
     return ctrl;
   }
 

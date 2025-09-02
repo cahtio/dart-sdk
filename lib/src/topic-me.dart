@@ -117,7 +117,7 @@ class TopicMe extends Topic {
           }
 
           _contacts.remove(topicName);
-          _cacheManager.delete('topic', topicName ?? '');
+          _cacheManager.deleteTopic(topicName);
         } else {
           // Ensure the values are defined and are integers.
           if (sub.seq != null) {
@@ -148,7 +148,7 @@ class TopicMe extends Topic {
             cached.user = sub.user ?? cached.user;
           } else {
             cached = sub;
-            _contacts[(topicName ?? '')] = sub;
+            _contacts[topicName] = sub;
           }
           cont = cached;
 
@@ -170,6 +170,8 @@ class TopicMe extends Topic {
         }
       } else {
         final newTopic = _tinodeService.newTopicWithSubscription(sub);
+        _cacheManager.putTopic(topicName, newTopic);
+        _loggerService.log('put topic $topicName}');
         await newTopic.persist();
       }
 
@@ -316,7 +318,7 @@ class TopicMe extends Topic {
         case 'gone':
           // topic deleted or unsubscribed from
           _contacts.remove(pres.src);
-          _cacheManager.delete('topic', pres.src ?? '');
+          _cacheManager.deleteTopic(pres.src ?? '');
           break;
         case 'del':
           // Update topic.del value.

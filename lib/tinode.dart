@@ -2,11 +2,9 @@ library tinode;
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
-import 'package:tinode/src/models/concurrent_map.dart';
 
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
 import 'package:tinode/src/models/server-configuration.dart';
@@ -122,7 +120,7 @@ class Tinode {
 
   DateTime? _topicsUpdated;
 
-  final _topics = ConcurrentMap<String, Topic>();
+  // final _topics = ConcurrentMap<String, Topic>();
 
   DateTime? get topicsUpdated => _topicsUpdated;
 
@@ -143,18 +141,14 @@ class Tinode {
     _loadTopics();
   }
 
-  Future<List<Topic>> getTopics() async {
-    final values = await _topics.values;
-    return values.toList();
-  }
+  List<Topic> getTopics() => _cacheManager.topics.toList();
 
-  Future<List<Topic>> getFilteredTopics({bool Function(Topic)? filter}) async {
+  List<Topic> getFilteredTopics({bool Function(Topic)? filter}) {
     if (filter == null) {
-      final values = await _topics.values;
-      return values.toList();
+      return getTopics();
     }
     final result = List<Topic>.empty(growable: true);
-    final values = await _topics.values;
+    final values = _cacheManager.topics;
     values.forEach((topic) {
       if (filter(topic)) {
         result.add(topic);
@@ -221,7 +215,8 @@ class Tinode {
     if (allTopics == null) return;
     for (final t in allTopics) {
       // _cacheManager.putTopic(t);
-      await _topics.set(t.name!, t);
+      // await _topics.set(t.name!, t);
+      _cacheManager.putTopic(t.name!, t);
       if (t.updated != null &&
           (_topicsUpdated ?? DateTime.fromMicrosecondsSinceEpoch(0)).compareTo(
                 t.updated!,
@@ -235,8 +230,8 @@ class Tinode {
     if (messages != null) {
       for (final m in messages) {
         if (m.topic != null) {
-          // final topic = _cacheManager.getTopic(m.topic!);
-          final topic = await _topics.get(m.topic!);
+          final topic = _cacheManager.getTopic(m.topic!);
+          // final topic = await _topics.get(m.topic!);
           topic?.lastMessage = m;
         }
       }
@@ -256,13 +251,16 @@ class Tinode {
   void _onConnectionDisconnect() {
     _unsubscribeAll();
     _futureManager.rejectAllFutures(0, 'disconnect');
-    _cacheManager.map((String key, dynamic value) {
-      if (key.contains('topic:')) {
-        Topic topic = value;
-        topic.resetSubscription();
-      }
-      return MapEntry(key, value);
+    _cacheManager.topicsForEach((key, topic) {
+      topic.resetSubscription();
     });
+    // _cacheManager.map((String key, dynamic value) {
+    //   if (key.contains('topic:')) {
+    //     Topic topic = value;
+    //     topic.resetSubscription();
+    //   }
+    //   return MapEntry(key, value);
+    // });
     onDisconnect.add(null);
   }
 
@@ -543,7 +541,7 @@ class Tinode {
 
   /// Check if named topic is already present in cache
   bool isTopicCached(String topicName) {
-    var topic = _cacheManager.get('topic', topicName);
+    var topic = _cacheManager.getTopic(topicName);
     return topic != null;
   }
 

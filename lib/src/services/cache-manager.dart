@@ -20,59 +20,41 @@ class CacheUser {
 /// Cache manager is responsible for reading and writing data into cache
 class CacheManager {
   /// This map holds the cached data
-  final Map<String, dynamic> _cache = {};
+  final Map<String, TopicSubscription> _users = {};
+  final Map<String, Topic> _topics = {};
 
-  /// Put a new data into cache, if the data already exists, replace it
-  void put(String type, String name, dynamic obj) {
-    _cache[type + ':' + name] = obj;
-  }
-
-  /// Get a specific data from cache using type and name
-  dynamic get(String type, String name) {
-    return _cache[type + ':' + name];
-  }
-
-  /// Delete a specific key-value from cache map
-  void delete(String type, String name) {
-    _cache.remove(type + ':' + name);
-  }
-
-  bool containsKey(String type, String name) =>
-      _cache.containsKey(type + ':' + name);
+  Iterable<Topic> get topics => _topics.values;
 
   /// Executes a function for each element in cache, just like map method on `Map`
-  void map(MapEntry Function(String, dynamic) function) {
-    _cache.map(function);
-  }
+  // void map(MapEntry Function(String, dynamic) function) {
+  //   _cache.map(function);
+  // }
 
   /// This is a wrapper for `get` function which gets a user from cache by userId
-  TopicSubscription? getUser(String userId) {
-    return get('user', userId);
-  }
+  TopicSubscription? getUser(String userId) => _users[userId];
 
   /// This is a wrapper for `put` function which puts a user into cache by userId
-  void putUser(String userId, TopicSubscription user) {
-    return put('user', userId, user.copy());
-  }
+  void putUser(String userId, TopicSubscription user) => _users[userId] = user;
 
   /// This is a wrapper for `delete` function which deletes a user from cache by userId
-  void deleteUser(String userId) {
-    return delete('user', userId);
-  }
+  TopicSubscription? deleteUser(String userId) => _users.remove(userId);
 
-  bool containsUser(String userId) => containsKey('user', userId);
+  bool containsUser(String userId) => _users.containsKey(userId);
 
   Topic? getTopic(String name) {
-    return get('topic', name);
+    return _topics[name];
   }
 
   /// This is a wrapper for `put` function which puts a topic into cache
-  void putTopic(Topic topic) {
-    return put('topic', (topic.name ?? ''), topic);
-  }
+  void putTopic(String topicName, Topic topic) => _topics[topicName] = topic;
 
   /// This is a wrapper for `delete` function which deletes a topic from cache by topic name
-  void deleteTopic(String topicName) {
-    return delete('topic', topicName);
+  Topic? deleteTopic(String topicName) {
+    return _topics.remove(topicName);
   }
+
+  bool containsTopic(String topicName) => _topics.containsKey(topicName);
+
+  void topicsForEach(void Function(String key, Topic topic) action) =>
+      _topics.forEach(action);
 }

@@ -24,7 +24,7 @@ class LoggerService {
     _log(prefix, LogType.warn, message);
   }
 
-  _log(LogPrefix prefix, LogType type, String message) {
+  void _log(LogPrefix prefix, LogType type, String message) {
     if (_configService.loggerEnabled == null ||
         !_configService.loggerEnabled!) {
       return;
