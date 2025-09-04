@@ -22,7 +22,7 @@ class PacketGenerator {
           ua: _configService.userAgent,
           dev: _configService.deviceToken,
           lang: _configService.humanLanguage,
-          platf: _configService.platform,
+          platf: _configService.platform.toLowerCase(),
         );
         break;
 
