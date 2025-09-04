@@ -29,7 +29,7 @@ class ConfigService {
   }
 
   String get userAgent {
-    return appName + ' (Dart; ' + Platform.operatingSystem + '); tinode-dart/' + appVersion;
+    return appName + ' (Dart; ' + Platform.operatingSystem.toLowerCase() + '); tinode-dart/' + appVersion;
   }
 
   String get platform {
