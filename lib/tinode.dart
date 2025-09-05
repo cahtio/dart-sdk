@@ -9,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
 import 'package:tinode/src/models/server-configuration.dart';
 import 'package:tinode/src/models/connection-options.dart';
+import 'package:tinode/src/models/topic-subscription.dart';
 import 'package:tinode/src/services/packet-generator.dart';
 import 'package:tinode/src/services/future-manager.dart';
 import 'package:tinode/src/models/server-messages.dart';
@@ -43,6 +44,7 @@ export 'package:tinode/src/models/app-settings.dart';
 export 'package:tinode/src/models/packet-types.dart';
 export 'package:tinode/src/models/packet-data.dart';
 export 'package:tinode/src/models/auth-token.dart';
+
 // export 'package:tinode/src/models/auth-token.dart';
 export 'package:tinode/src/models/credential.dart';
 export 'package:tinode/src/models/set-params.dart';
@@ -475,6 +477,8 @@ class Tinode {
   String getCurrentUserId() {
     return _authService.userId!;
   }
+
+  List<TopicSubscription> getUsers() => _cacheManager.getUsers();
 
   /// Check if the given user ID is equal to the current user's user id
   bool isMe(String userId) {

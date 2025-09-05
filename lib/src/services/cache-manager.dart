@@ -47,6 +47,16 @@ class CacheManager {
     return get('user', userId);
   }
 
+  List<TopicSubscription> getUsers() {
+    final users = List<TopicSubscription>.empty(growable: true);
+    _cache.forEach((k, v) {
+      if (k.contains('user:')) {
+        users.add(v);
+      }
+    });
+    return users;
+  }
+
   /// This is a wrapper for `put` function which puts a user into cache by userId
   void putUser(String userId, TopicSubscription user) {
     return put('user', userId, user.copy());
