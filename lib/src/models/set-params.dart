@@ -10,4 +10,19 @@ class SetParams {
   List<String>? attachments;
 
   SetParams({this.desc, this.sub, this.tags, this.cred, this.attachments});
+
+  Map<String, dynamic> toMap() {
+    final map = <String, dynamic>{};
+    if (desc != null) {
+      final descMap = <String, dynamic>{};
+      if (desc!.private != null) {
+        descMap['private'] = desc!.private;
+      }
+      if (desc!.public != null) {
+        descMap['public'] = desc!.public;
+      }
+      map['desc'] = descMap;
+    }
+    return map;
+  }
 }

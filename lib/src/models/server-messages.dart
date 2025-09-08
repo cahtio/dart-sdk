@@ -61,6 +61,10 @@ class CtrlMessage {
       ts: msg['ts'],
     );
   }
+
+  @override
+  String toString() =>
+      'CtrlMessage(id: $id, topic: $topic, code: $code, text: $text, ts: $text, params: $params)';
 }
 
 class MetaMessage {
