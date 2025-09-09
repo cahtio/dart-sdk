@@ -337,4 +337,6 @@ class AccessMode {
       'want': AccessMode.encode(_want) ?? 'invalid',
     };
   }
+
+  Map<String, dynamic> toJson() => jsonHelper();
 }

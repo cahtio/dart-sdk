@@ -164,4 +164,11 @@ class TopicSubscription {
       updated: updated,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+    if (user != null) json['user'] = user;
+    if (acs != null) json['acs'] = acs;
+    return json;
+  }
 }

@@ -390,7 +390,7 @@ class Topic {
   }
 
   /// Create new topic subscription. Wrapper for Tinode.setMeta
-  Future<CtrlMessage> invite(String userId, String mode) {
+  Future<CtrlMessage> invite(String userId, String? mode) {
     return setMeta(SetParams(sub: TopicSubscription(user: userId, mode: mode)));
   }
 
