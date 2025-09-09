@@ -480,6 +480,8 @@ class Tinode {
 
   List<TopicSubscription> getUsers() => _cacheManager.getUsers();
 
+  TopicSubscription? getUser(String userId) => _cacheManager.getUser(userId);
+
   /// Check if the given user ID is equal to the current user's user id
   bool isMe(String userId) {
     return _tinodeService.isMe(userId);
