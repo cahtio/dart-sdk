@@ -310,6 +310,10 @@ class TinodeService {
       if (setParams.tags != null) {
         data.set!.tags = setParams.tags;
       }
+
+      if (setParams.attachments != null && setParams.attachments!.isNotEmpty) {
+        packet.extra = {'attachments': setParams.attachments};
+      }
     }
 
     packet.data = data;

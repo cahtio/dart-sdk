@@ -518,12 +518,12 @@ class Topic {
           Exception('Cannot delete subscription in inactive topic'));
     }
     // Send {del} message, return promise
-    var ctrl = await _tinodeService.deleteSubscription(name ?? '', userId);
+    final ctrl = await _tinodeService.deleteSubscription(name ?? '', userId);
     // Remove the object from the subscription cache;
     _users.remove(userId);
     // Notify listeners
     onSubsUpdated.add(_users.values.toList());
-    return CtrlMessage.fromMessage((ctrl));
+    return ctrl;
   }
 
   /// Send a read/recv notification
