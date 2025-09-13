@@ -899,14 +899,36 @@ class Topic {
     clear = desc.clear ?? clear;
     created = desc.created ?? created;
     defacs = desc.defacs ?? defacs;
-    private = desc.private ?? private;
-    public = desc.public ?? public;
     read = desc.read ?? read;
     recv = desc.recv ?? recv;
     seq = desc.seq ?? seq;
     status = desc.status ?? status;
     updated = desc.updated ?? updated;
     touched = desc.touched ?? touched;
+
+    if (private != null &&
+        private is Map<String, dynamic> &&
+        desc.private != null &&
+        desc.private is Map<String, dynamic>) {
+      private = {
+        ...(private as Map<String, dynamic>),
+        ...(desc.private as Map<String, dynamic>)
+      };
+    } else {
+      private = desc.private ?? private;
+    }
+
+    if (public != null &&
+        public is Map<String, dynamic> &&
+        desc.public != null &&
+        desc.public is Map<String, dynamic>) {
+      public = {
+        ...(public as Map<String, dynamic>),
+        ...(desc.public as Map<String, dynamic>)
+      };
+    } else {
+      public = desc.public ?? public;
+    }
 
     if (name == topic_names.TOPIC_ME && !desc.noForwarding!) {
       var me = _tinodeService.getTopic(topic_names.TOPIC_ME);
