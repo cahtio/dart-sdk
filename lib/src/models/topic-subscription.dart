@@ -169,6 +169,7 @@ class TopicSubscription {
     final json = <String, dynamic>{};
     if (user != null) json['user'] = user;
     if (acs != null) json['acs'] = acs;
+    if (mode != null) json['mode'] = mode;
     return json;
   }
 }

@@ -73,7 +73,7 @@ class AccessMode {
       } else {
         mode = _given & _want;
       }
-    }else{
+    } else {
       _given = 0;
       _want = 0;
       mode = _given & _want;
