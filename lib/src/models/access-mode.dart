@@ -187,10 +187,20 @@ class AccessMode {
     return val;
   }
 
+  static int and(dynamic a1, dynamic a2) {
+    var a1d = AccessMode.decode(a1) ?? INVALID;
+    var a2d = AccessMode.decode(a2) ?? INVALID;
+
+    if (a1d == INVALID || a2d == INVALID) {
+      return INVALID;
+    }
+    return a1d & a2d;
+  }
+
   /// Get diff from two modes
   static int diff(dynamic a1, dynamic a2) {
-    var a1d = AccessMode.decode(a1) ?? 0;
-    var a2d = AccessMode.decode(a2) ?? 0;
+    var a1d = AccessMode.decode(a1) ?? INVALID;
+    var a2d = AccessMode.decode(a2) ?? INVALID;
 
     if (a1d == INVALID || a2d == INVALID) {
       return INVALID;

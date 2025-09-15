@@ -44,6 +44,7 @@ export 'package:tinode/src/models/app-settings.dart';
 export 'package:tinode/src/models/packet-types.dart';
 export 'package:tinode/src/models/packet-data.dart';
 export 'package:tinode/src/models/auth-token.dart';
+export 'package:tinode/src/models/access-mode.dart' hide NONE, READ;
 
 // export 'package:tinode/src/models/auth-token.dart';
 export 'package:tinode/src/models/credential.dart';
