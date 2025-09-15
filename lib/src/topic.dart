@@ -505,10 +505,10 @@ class Topic {
 
   /// Delete topic. Requires Owner permission. Wrapper for Tinode.delTopic
   Future<CtrlMessage> deleteTopic(bool hard) async {
-    var ctrl = await _tinodeService.deleteTopic(name ?? '', hard);
+    final ctrl = await _tinodeService.deleteTopic(name ?? '', hard);
     resetSubscription();
     _gone();
-    return CtrlMessage.fromMessage(ctrl);
+    return ctrl;
   }
 
   /// Delete subscription. Requires Share permission. Wrapper for Tinode.deleteSubscription
