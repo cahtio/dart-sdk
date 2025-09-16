@@ -389,6 +389,17 @@ class Topic {
     return setMeta(SetParams(sub: TopicSubscription(user: userId, mode: am)));
   }
 
+  Future<CtrlMessage> updateDefacs(String? auth, String? anon) {
+    DefAcs newdacs;
+    if (defacs != null) {
+      newdacs = DefAcs.fromAcs(defacs!);
+      newdacs.update(auth, anon);
+    } else {
+      newdacs = DefAcs.fromString(auth, anon);
+    }
+    return setMeta(SetParams(desc: TopicDescription(defacs: newdacs)));
+  }
+
   /// Create new topic subscription. Wrapper for Tinode.setMeta
   Future<CtrlMessage> invite(String userId, String? mode) {
     return setMeta(SetParams(sub: TopicSubscription(user: userId, mode: mode)));
