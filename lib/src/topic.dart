@@ -18,6 +18,7 @@ import 'package:tinode/src/models/set-params.dart';
 import 'package:tinode/src/meta-get-builder.dart';
 import 'package:tinode/src/models/del-range.dart';
 import 'package:tinode/src/models/get-query.dart';
+import 'package:tinode/src/services/database-manager.dart';
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/services/tinode.dart';
 import 'package:tinode/src/models/message.dart';
@@ -119,6 +120,10 @@ class Topic {
   /// Logger service, responsible for logging content in different levels
   late LoggerService _loggerService;
 
+  late DatabaseManager _databaseManager;
+
+  var _isPersisted = false;
+
   /// This event will be triggered when a `data` message is received
   PublishSubject<DataMessage?> onData = PublishSubject<DataMessage?>();
 
@@ -148,6 +153,9 @@ class Topic {
   /// This event will be triggered when all messages are received
   PublishSubject<int> onAllMessagesReceived = PublishSubject<int>();
 
+  PublishSubject<List<DataMessage>> onPersist =
+      PublishSubject<List<DataMessage>>();
+
   Topic(String topicName) {
     _resolveDependencies();
     name = topicName;
@@ -159,6 +167,7 @@ class Topic {
     _loggerService = GetIt.I.get<LoggerService>();
     _tinodeService = GetIt.I.get<TinodeService>();
     _configService = GetIt.I.get<ConfigService>();
+    _databaseManager = GetIt.I.get<DatabaseManager>();
   }
 
   // See if you have subscribed to this topic
@@ -169,6 +178,14 @@ class Topic {
   // To set _subscribed manually, Used in unit tests
   set isSubscribed(value) {
     _subscribed = value;
+  }
+
+  void persist() async {
+    if (_isPersisted) return;
+    final dataMessages = await _databaseManager.message.query(name!);
+    _messages.put(dataMessages);
+    _isPersisted = true;
+    onPersist.add(dataMessages);
   }
 
   Future<CtrlMessage> subscribe(
@@ -741,7 +758,7 @@ class Topic {
   }
 
   /// Process data message
-  void routeData(DataMessage data) {
+  void routeData(DataMessage data) async {
     if (data.content != null) {
       if (touched == null) {
         touched = data.ts;
@@ -762,6 +779,7 @@ class Topic {
 
     if (!data.noForwarding!) {
       _messages.put([data]);
+      await _databaseManager.message.msgReceived(data);
       _updateDeletedRanges();
     }
 

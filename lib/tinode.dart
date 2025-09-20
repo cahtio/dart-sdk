@@ -10,6 +10,7 @@ import 'package:tinode/src/models/topic-names.dart' as topic_names;
 import 'package:tinode/src/models/server-configuration.dart';
 import 'package:tinode/src/models/connection-options.dart';
 import 'package:tinode/src/models/topic-subscription.dart';
+import 'package:tinode/src/services/database-manager.dart';
 import 'package:tinode/src/services/packet-generator.dart';
 import 'package:tinode/src/services/future-manager.dart';
 import 'package:tinode/src/models/server-messages.dart';
@@ -82,6 +83,8 @@ class Tinode {
   /// Connection service, responsible for establishing a websocket connection to the server
   late ConnectionService _connectionService;
 
+  late DatabaseManager _databaseManager;
+
   /// `onMessage` subscription stored to unsubscribe later
   StreamSubscription? _onMessageSubscription;
 
@@ -134,6 +137,7 @@ class Tinode {
       GetIt.I.registerSingleton<PacketGenerator>(PacketGenerator());
       GetIt.I.registerSingleton<CacheManager>(CacheManager());
       GetIt.I.registerSingleton<TinodeService>(TinodeService());
+      GetIt.I.registerSingleton<DatabaseManager>(DatabaseManager.instance);
     }
   }
 
@@ -146,6 +150,7 @@ class Tinode {
     _connectionService = GetIt.I.get<ConnectionService>();
     _cacheManager = GetIt.I.get<CacheManager>();
     _authService = GetIt.I.get<AuthService>();
+    _databaseManager = GetIt.I.get<DatabaseManager>();
   }
 
   /// Subscribe to needed events like connection
