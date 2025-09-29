@@ -69,7 +69,7 @@ class Topic {
   int _maxDel = 0;
 
   ///  User discovery tags
-  late List<String> tags;
+  List<String> tags = [];
 
   /// Message cache, sorted by message seq values, from old to new
   final SortedCache<DataMessage> _messages =
@@ -121,8 +121,6 @@ class Topic {
   late LoggerService _loggerService;
 
   late DatabaseManager _databaseManager;
-
-  var _isPersisted = false;
 
   /// This event will be triggered when a `data` message is received
   PublishSubject<DataMessage?> onData = PublishSubject<DataMessage?>();
@@ -178,14 +176,6 @@ class Topic {
   // To set _subscribed manually, Used in unit tests
   set isSubscribed(value) {
     _subscribed = value;
-  }
-
-  void persist() async {
-    if (_isPersisted) return;
-    final dataMessages = await _databaseManager.message.query(name!);
-    _messages.put(dataMessages);
-    _isPersisted = true;
-    onPersist.add(dataMessages);
   }
 
   Future<CtrlMessage> subscribe(
@@ -647,6 +637,11 @@ class Topic {
   /// Get all cached subscriptions for this topic
   List<DataMessage> get messages {
     return _messages.buffer;
+  }
+
+  Future<List<DataMessage>?> getStoredMessages() async {
+    if (name == null) return null;
+    return _databaseManager.message.query(name!);
   }
 
   /// Get the number of topic subscribers who marked this message as either recv or read

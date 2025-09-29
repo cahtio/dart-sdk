@@ -45,8 +45,8 @@ class MessageStore with StoreMixin {
   }
 
   Future<List<DataMessage>> query(String topic) async {
-    final maps = await db
-        .query(kTableName, where: '$kColumnTopic = ?', whereArgs: [topic]);
+    final maps = await db.query(kTableName,
+        where: '$kColumnTopic = ?', whereArgs: [topic], orderBy: kColumnSeq);
     return maps.map((row) {
       dynamic content;
       if (row[kColumnContent] == null) {
@@ -103,6 +103,7 @@ class MessageStore with StoreMixin {
 
   Future<int> _count(String topic, String from, int seq) async {
     final count = Sqflite.firstIntValue(await db.query(kTableName,
+        columns: ['COUNT(*)'],
         where: '$kColumnTopic = ? AND $kColumnFrom = ? AND $kColumnSeq = ?',
         whereArgs: [topic, from, seq]));
     if (count == null) {
