@@ -53,7 +53,8 @@ class AuthService {
     _authenticated = (ctrl.code ?? 0) >= 200 && (ctrl.code ?? 0) < 300;
 
     if (params['token'] != null && params['expires'] != null) {
-      _authToken = AuthToken(params['token'], DateTime.parse(params['expires']));
+      _authToken =
+          AuthToken(params['token'], DateTime.parse(params['expires']));
     } else {
       _authToken = null;
     }
@@ -63,5 +64,12 @@ class AuthService {
     if (code != null && text != null) {
       onLogin.add(OnLoginData(code, text));
     }
+  }
+
+  void reset() {
+    _userId = null;
+    _lastLogin = null;
+    _authToken = null;
+    _authenticated = false;
   }
 }

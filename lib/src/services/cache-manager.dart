@@ -76,4 +76,8 @@ class CacheManager {
   void deleteTopic(String topicName) {
     return delete('topic', topicName);
   }
+
+  void reset() {
+    _cache.clear();
+  }
 }

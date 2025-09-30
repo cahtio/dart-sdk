@@ -68,4 +68,8 @@ class DatabaseManager {
   void _log(String msg) {
     _loggerService.log('Database - $msg');
   }
+
+  Future<void> reset() async {
+    await message.clearTable();
+  }
 }

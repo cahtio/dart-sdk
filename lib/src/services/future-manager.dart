@@ -81,4 +81,9 @@ class FutureManager {
       _expiredFuturesCheckerTimer = null;
     }
   }
+
+  void reset() {
+    stopCheckingExpiredFutures();
+    _pendingFutures.clear();
+  }
 }

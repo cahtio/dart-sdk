@@ -60,6 +60,8 @@ export 'package:tinode/src/topic-fnd.dart';
 export 'package:tinode/src/topic-me.dart';
 export 'package:tinode/src/topic.dart';
 
+export 'package:tinode/src/services/database-manager.dart';
+
 /// Provides a simple interface to interact with tinode server using websocket
 class Tinode {
   /// Authentication service, responsible for managing credentials and user id
@@ -352,6 +354,13 @@ class Tinode {
   /// Wrapper for `login` with token authentication
   Future loginToken(String token, Map<String, dynamic> cred) {
     return login('token', token, cred);
+  }
+
+  Future<void> logout() async {
+    await _databaseManager.reset();
+    _futureManager.reset();
+    _authService.reset();
+    _cacheManager.reset();
   }
 
   /// Send a request for resetting an authentication secret

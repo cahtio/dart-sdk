@@ -44,6 +44,10 @@ class MessageStore with StoreMixin {
     return db.execute('DROP TABLE IF EXISTS $kTableName');
   }
 
+  Future<void> clearTable() async {
+    await db.delete(kTableName);
+  }
+
   Future<List<DataMessage>> query(String topic) async {
     final maps = await db.query(kTableName,
         where: '$kColumnTopic = ?', whereArgs: [topic], orderBy: kColumnSeq);
@@ -71,10 +75,6 @@ class MessageStore with StoreMixin {
               ? DateTime.fromMillisecondsSinceEpoch(row[kColumnTs] as int)
               : null);
     }).toList();
-
-    //     $kColumnSeq INTEGER NOT NULL,
-    //     $kColumnHigh INTEGER,
-    //     $kColumnTs INTEGER
   }
 
   Future<void> msgReceived(DataMessage message) async {
