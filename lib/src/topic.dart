@@ -639,9 +639,19 @@ class Topic {
     return _messages.buffer;
   }
 
+  DataMessage? get lastMessages {
+    if (_messages.length == 0) return null;
+    return _messages.getLast();
+  }
+
   Future<List<DataMessage>?> getStoredMessages() async {
     if (name == null) return null;
     return _databaseManager.message.query(name!);
+  }
+
+  Future<DataMessage?> getLastStoredMessage() async {
+    if (name == null) return null;
+    return _databaseManager.message.lastMessage(name!);
   }
 
   /// Get the number of topic subscribers who marked this message as either recv or read

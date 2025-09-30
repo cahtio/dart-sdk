@@ -51,30 +51,17 @@ class MessageStore with StoreMixin {
   Future<List<DataMessage>> query(String topic) async {
     final maps = await db.query(kTableName,
         where: '$kColumnTopic = ?', whereArgs: [topic], orderBy: kColumnSeq);
-    return maps.map((row) {
-      dynamic content;
-      if (row[kColumnContent] == null) {
-        content = null;
-      } else {
-        try {
-          content = jsonDecode(row[kColumnContent] as String);
-        } catch (e) {
-          content = row[kColumnContent];
-        }
-      }
-      return DataMessage(
-          topic: row[kColumnTopic] as String,
-          from: row[kColumnFrom] as String,
-          head: row[kColumnHead] != null
-              ? jsonDecode(row[kColumnHead] as String)
-              : null,
-          content: content,
-          seq: row[kColumnSeq] as int?,
-          hi: row[kColumnHigh] as int?,
-          ts: row[kColumnTs] != null
-              ? DateTime.fromMillisecondsSinceEpoch(row[kColumnTs] as int)
-              : null);
-    }).toList();
+    return maps.map((row) => _convert(row)).toList();
+  }
+
+  Future<DataMessage?> lastMessage(String topic) async {
+    final maps = await db.query(kTableName,
+        where: '$kColumnTopic = ?',
+        whereArgs: [topic],
+        orderBy: '$kColumnSeq desc',
+        limit: 1);
+    if (maps.isEmpty) return null;
+    return _convert(maps.first);
   }
 
   Future<void> msgReceived(DataMessage message) async {
@@ -176,6 +163,31 @@ class MessageStore with StoreMixin {
     return db.update(kTableName, values,
         where: '$kColumnTopic = ? AND $kColumnFrom = ? AND $kColumnSeq = ?',
         whereArgs: [message.topic!, message.from!, message.seq!]);
+  }
+
+  DataMessage _convert(Map<String, Object?> row) {
+    dynamic content;
+    if (row[kColumnContent] == null) {
+      content = null;
+    } else {
+      try {
+        content = jsonDecode(row[kColumnContent] as String);
+      } catch (e) {
+        content = row[kColumnContent];
+      }
+    }
+    return DataMessage(
+        topic: row[kColumnTopic] as String,
+        from: row[kColumnFrom] as String,
+        head: row[kColumnHead] != null
+            ? jsonDecode(row[kColumnHead] as String)
+            : null,
+        content: content,
+        seq: row[kColumnSeq] as int?,
+        hi: row[kColumnHigh] as int?,
+        ts: row[kColumnTs] != null
+            ? DateTime.fromMillisecondsSinceEpoch(row[kColumnTs] as int)
+            : null);
   }
 
   void _logError(String msg) {
