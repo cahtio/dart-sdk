@@ -352,6 +352,8 @@ class TinodeService {
     return Topic(topic_names.TOPIC_NEW_CHAN);
   }
 
+  Topic newGroup() => Topic(newGroupTopicName(false));
+
   String newGroupTopicName(bool isChan) {
     return (isChan ? topic_names.TOPIC_NEW_CHAN : topic_names.TOPIC_NEW) +
         Tools.getNextUniqueId();

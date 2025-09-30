@@ -468,6 +468,10 @@ class Tinode {
     return _tinodeService.newTopic();
   }
 
+  Topic newGroup() {
+    return _tinodeService.newGroup();
+  }
+
   /// Generate unique name like 'new123456' suitable for creating a new group topic
   String newGroupTopicName(bool isChan) {
     return _tinodeService.newGroupTopicName(isChan);
