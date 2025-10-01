@@ -226,6 +226,8 @@ class Topic {
         if (me != null) {
           me.processMetaSub([
             TopicSubscription(
+              public: setParams?.desc?.public,
+              private: setParams?.desc?.private,
               noForwarding: true,
               topic: name,
               created: ctrl.ts,
