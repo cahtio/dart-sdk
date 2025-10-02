@@ -966,8 +966,8 @@ class Topic {
       public = desc.public ?? public;
     }
 
-    if (name == topic_names.TOPIC_ME && !desc.noForwarding!) {
-      var me = _tinodeService.getTopic(topic_names.TOPIC_ME);
+    if (name != topic_names.TOPIC_ME) {
+      final me = _tinodeService.getTopic(topic_names.TOPIC_ME);
       if (me != null) {
         me.processMetaSub([
           TopicSubscription(
