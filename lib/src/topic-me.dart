@@ -393,9 +393,11 @@ class TopicMe extends Topic {
     return _contacts.values.toList();
   }
 
-  void setLastMessage(String contactName, dynamic content) {
+  void setLastMessage(String contactName, DateTime? updated, dynamic content) {
     final cont = _contacts[contactName];
+
     if (cont == null || content == null) return;
+    cont.updated = updated;
     cont.lastMessageContent = content;
     onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
   }

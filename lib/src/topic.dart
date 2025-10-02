@@ -793,7 +793,7 @@ class Topic {
 
     // Update locally cached contact with the new message count.
     var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
-    me.setLastMessage(name ?? '', data.content);
+    me.setLastMessage(name ?? '', data.ts, data.content);
     me.setMsgReadRecv(
         name ?? '',
         (data.from == null || _tinodeService.isMe(data.from!)) ? 'read' : 'msg',
