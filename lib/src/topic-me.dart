@@ -11,6 +11,7 @@ import 'package:tinode/src/services/cache-manager.dart';
 import 'package:tinode/src/models/contact-update.dart';
 import 'package:tinode/src/models/access-mode.dart';
 import 'package:tinode/src/models/credential.dart';
+import 'package:tinode/src/services/database-manager.dart';
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/services/tinode.dart';
 import 'package:tinode/src/services/tools.dart';
@@ -43,6 +44,8 @@ class TopicMe extends Topic {
   /// Logger service, responsible for logging content in different levels
   late LoggerService _loggerService;
 
+  late DatabaseManager _databaseManager;
+
   late AuthService _authService;
 
   TopicMe() : super(topic_names.TOPIC_ME) {
@@ -50,6 +53,7 @@ class TopicMe extends Topic {
     _tinodeService = GetIt.I.get<TinodeService>();
     _loggerService = GetIt.I.get<LoggerService>();
     _authService = GetIt.I.get<AuthService>();
+    _databaseManager = GetIt.I.get<DatabaseManager>();
   }
 
   /// Override the original Topic.processMetaDesc.
@@ -94,7 +98,7 @@ class TopicMe extends Topic {
 
   /// Override the original Topic.processMetaSub
   @override
-  void processMetaSub(List<TopicSubscription> subscriptions) {
+  void processMetaSub(List<TopicSubscription> subscriptions) async {
     for (var sub in subscriptions) {
       var topicName = sub.topic;
       // Don't show 'me' and 'fnd' topics in the list of contacts.
@@ -142,6 +146,12 @@ class TopicMe extends Topic {
         cont = cached;
 
         if (topicName != null) {
+          if (cont.lastMessageContent == null) {
+            final msg = await _databaseManager.message.lastMessage(topicName);
+            if (msg != null) {
+              cont.lastMessageContent = msg.content;
+            }
+          }
           if (Tools.isP2PTopicName(topicName)) {
             _cacheManager.putUser(topicName, cont);
           }
@@ -381,6 +391,13 @@ class TopicMe extends Topic {
 
   List<TopicSubscription> get contacts {
     return _contacts.values.toList();
+  }
+
+  void setLastMessage(String contactName, dynamic content) {
+    final cont = _contacts[contactName];
+    if (cont == null || content == null) return;
+    cont.lastMessageContent = content;
+    onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
   }
 
   /// Update a cached contact with new read/received/message count

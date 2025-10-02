@@ -84,26 +84,28 @@ class TopicSubscription {
 
   int? unread;
 
-  TopicSubscription({
-    this.user,
-    this.updated,
-    this.touched,
-    this.acs,
-    this.read,
-    this.recv,
-    this.clear,
-    this.public,
-    this.private,
-    this.online,
-    this.topic,
-    this.seq,
-    this.seen,
-    this.noForwarding,
-    this.deleted,
-    this.created,
-    this.mode,
-    this.unread,
-  });
+  dynamic lastMessageContent;
+
+  TopicSubscription(
+      {this.user,
+      this.updated,
+      this.touched,
+      this.acs,
+      this.read,
+      this.recv,
+      this.clear,
+      this.public,
+      this.private,
+      this.online,
+      this.topic,
+      this.seq,
+      this.seen,
+      this.noForwarding,
+      this.deleted,
+      this.created,
+      this.mode,
+      this.unread,
+      this.lastMessageContent});
 
   static TopicSubscription fromMessage(Map<String, dynamic> msg) {
     return TopicSubscription(
@@ -129,24 +131,24 @@ class TopicSubscription {
 
   TopicSubscription copy() {
     return TopicSubscription(
-      user: user,
-      updated: updated,
-      touched: touched,
-      deleted: deleted,
-      created: created,
-      acs: acs,
-      read: read,
-      recv: recv,
-      clear: clear,
-      public: public,
-      private: private,
-      online: online,
-      topic: topic,
-      seq: seq,
-      seen: seen,
-      noForwarding: noForwarding,
-      mode: mode,
-    );
+        user: user,
+        updated: updated,
+        touched: touched,
+        deleted: deleted,
+        created: created,
+        acs: acs,
+        read: read,
+        recv: recv,
+        clear: clear,
+        public: public,
+        private: private,
+        online: online,
+        topic: topic,
+        seq: seq,
+        seen: seen,
+        noForwarding: noForwarding,
+        mode: mode,
+        lastMessageContent: lastMessageContent);
   }
 
   TopicDescription asDesc() {
