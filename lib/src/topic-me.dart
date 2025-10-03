@@ -146,12 +146,8 @@ class TopicMe extends Topic {
         cont = cached;
 
         if (topicName != null) {
-          if (cont.lastMessageContent == null) {
-            final msg = await _databaseManager.message.lastMessage(topicName);
-            if (msg != null) {
-              cont.lastMessageContent = msg.content;
-            }
-          }
+          cont.lastMessage ??=
+              await _databaseManager.message.lastMessage(topicName);
           if (Tools.isP2PTopicName(topicName)) {
             _cacheManager.putUser(topicName, cont);
           }
@@ -393,13 +389,15 @@ class TopicMe extends Topic {
     return _contacts.values.toList();
   }
 
-  void setLastMessage(String contactName, DateTime? updated, dynamic content) {
+  void setLastMessage(String contactName, DataMessage message) {
     final cont = _contacts[contactName];
 
-    if (cont == null || content == null) return;
-    cont.updated = updated;
-    cont.lastMessageContent = content;
-    onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
+    if (cont == null) return;
+    if ((cont.lastMessage?.seq ?? 0) < (message.seq ?? 0)) {
+      cont.updated = message.ts;
+      cont.lastMessage = message;
+      onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
+    }
   }
 
   /// Update a cached contact with new read/received/message count

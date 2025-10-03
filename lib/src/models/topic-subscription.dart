@@ -1,5 +1,6 @@
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/access-mode.dart';
+import 'package:tinode/tinode.dart';
 
 /// Info on when the peer was last online
 class Seen {
@@ -84,7 +85,7 @@ class TopicSubscription {
 
   int? unread;
 
-  dynamic lastMessageContent;
+  DataMessage? lastMessage;
 
   TopicSubscription(
       {this.user,
@@ -105,7 +106,7 @@ class TopicSubscription {
       this.created,
       this.mode,
       this.unread,
-      this.lastMessageContent});
+      this.lastMessage});
 
   static TopicSubscription fromMessage(Map<String, dynamic> msg) {
     return TopicSubscription(
@@ -148,7 +149,7 @@ class TopicSubscription {
         seen: seen,
         noForwarding: noForwarding,
         mode: mode,
-        lastMessageContent: lastMessageContent);
+        lastMessage: lastMessage);
   }
 
   TopicDescription asDesc() {
