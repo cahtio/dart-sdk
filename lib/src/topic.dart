@@ -1164,9 +1164,13 @@ class Topic {
       }
 
       // Previous is not a gap. Create a new gap.
+      // prev = DataMessage(
+      //   seq: (data.hi! > 0 ? data.hi! : data.seq)! + 1,
+      //   hi: data.hi! > 0 ? data.hi : data.seq,
+      // );
       prev = DataMessage(
-        seq: (data.hi! > 0 ? data.hi! : data.seq)! + 1,
-        hi: data.hi! > 0 ? data.hi : data.seq,
+        seq: (data.hi != null && data.hi! > 0 ? data.hi : data.seq ?? 0)! + 1,
+        hi: data.hi != null && data.hi! > 0 ? data.hi : data.seq,
       );
       ranges.add(prev);
     }, null, null);
