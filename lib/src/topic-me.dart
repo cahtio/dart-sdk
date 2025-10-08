@@ -136,9 +136,19 @@ class TopicMe extends Topic {
           cached.seen = sub.seen ?? cached.seen;
           cached.seen = sub.seen ?? cached.seen;
           cached.topic = sub.topic ?? cached.topic;
-          cached.touched = sub.touched ?? cached.touched;
-          cached.updated = sub.updated ?? cached.updated;
+          // cached.touched = sub.touched ?? cached.touched;
+          // cached.updated = sub.updated ?? cached.updated;
           cached.user = sub.user ?? cached.user;
+          if ((sub.touched ?? DateTime.fromMicrosecondsSinceEpoch(0)).compareTo(
+                  cached.touched ?? DateTime.fromMicrosecondsSinceEpoch(0)) >
+              0) {
+            cached.touched = sub.touched ?? cached.touched;
+          }
+          if ((sub.updated ?? DateTime.fromMicrosecondsSinceEpoch(0)).compareTo(
+                  cached.updated ?? DateTime.fromMicrosecondsSinceEpoch(0)) >
+              0) {
+            cached.updated = sub.updated ?? cached.updated;
+          }
         } else {
           cached = sub;
           _contacts[(topicName ?? '')] = sub;
