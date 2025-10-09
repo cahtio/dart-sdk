@@ -29,7 +29,11 @@ class ConfigService {
   }
 
   String get userAgent {
-    return appName + ' (Dart; ' + Platform.operatingSystem.toLowerCase() + '); tinode-dart/' + appVersion;
+    return appName +
+        ' (Dart; ' +
+        Platform.operatingSystem.toLowerCase() +
+        '); tinode-dart/' +
+        appVersion;
   }
 
   String get platform {
@@ -60,6 +64,11 @@ class ConfigService {
       maxTagLength: configuration['maxTagLength'],
       minTagLength: configuration['minTagLength'],
       ver: configuration['ver'],
+      iceServers: configuration['iceServers'] != null
+          ? (configuration['iceServers'] as List)
+              .map((e) => IceServer.fromJson(e))
+              .toList()
+          : null,
     );
   }
 }
