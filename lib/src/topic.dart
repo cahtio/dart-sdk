@@ -922,6 +922,8 @@ class Topic {
     onInfo.add(info);
   }
 
+  void routeMoment(MomentMessage moment) {}
+
   /// Called by Tinode when meta.desc packet is received.
   ///
   /// Called by 'me' topic on contact update (desc._noForwarding is true).

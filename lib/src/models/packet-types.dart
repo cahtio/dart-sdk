@@ -8,3 +8,4 @@ const String Get = 'get';
 const String Set = 'set';
 const String Del = 'del';
 const String Note = 'note';
+const String Moment = 'moment';

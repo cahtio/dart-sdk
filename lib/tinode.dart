@@ -231,6 +231,8 @@ class Tinode {
       _tinodeService.handlePresMessage(message.pres);
     } else if (message.info != null) {
       _tinodeService.handleInfoMessage(message.info);
+    } else if (message.moment != null) {
+      _tinodeService.handleMomentMessage(message.moment);
     }
   }
 

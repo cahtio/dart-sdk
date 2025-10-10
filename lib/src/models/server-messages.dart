@@ -1,3 +1,4 @@
+import 'package:tinode/src/models/moment.dart';
 import 'package:tinode/src/models/topic-subscription.dart';
 import 'package:tinode/src/models/delete-transaction.dart';
 import 'package:tinode/src/models/topic-description.dart';
@@ -10,8 +11,10 @@ class ServerMessage {
   final DataMessage? data;
   final PresMessage? pres;
   final InfoMessage? info;
+  final MomentMessage? moment;
 
-  ServerMessage({this.ctrl, this.meta, this.data, this.pres, this.info});
+  ServerMessage(
+      {this.ctrl, this.meta, this.data, this.pres, this.info, this.moment});
 
   static ServerMessage fromMessage(Map<String, dynamic> msg) {
     return ServerMessage(
@@ -20,6 +23,9 @@ class ServerMessage {
       data: msg['data'] != null ? DataMessage.fromMessage(msg['data']) : null,
       pres: msg['pres'] != null ? PresMessage.fromMessage(msg['pres']) : null,
       info: msg['info'] != null ? InfoMessage.fromMessage(msg['info']) : null,
+      moment: msg['moment_res'] != null
+          ? MomentMessage.fromMessage(msg['moment_res'])
+          : null,
     );
   }
 }
@@ -274,5 +280,22 @@ class InfoMessage {
       what: msg['what'],
       seq: msg['seq'],
     );
+  }
+}
+
+class MomentMessage {
+  final int id;
+  final String topic;
+  final List<Moment> moments;
+
+  MomentMessage({required this.id, required this.topic, required this.moments});
+
+  factory MomentMessage.fromMessage(Map<String, dynamic> msg) {
+    // List<dynamic> s = msg['moments'];
+    // final moments = <Moment>[];
+    // for(final i in s) {
+    //   moments.add(Moment.fromMessage(i));
+    // }
+    return MomentMessage(id: 1, topic: '', moments: List.empty());
   }
 }

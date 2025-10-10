@@ -231,3 +231,32 @@ class NotePacketData extends PacketData {
     };
   }
 }
+
+class MomentPacketData extends PacketData {
+  String topic;
+  String content;
+  int? privacy;
+  int? momId;
+  List<String>? attachments;
+
+  MomentPacketData(
+      {required this.topic,
+      required this.content,
+      this.privacy,
+      this.momId,
+      this.attachments});
+
+  @override
+  Map<String, dynamic> toMap() {
+    final data = <String, dynamic>{'content': content};
+
+    if (privacy != null) data['privacy'] = privacy;
+    if (momId != null) data['momId'] = momId;
+    if (attachments?.isNotEmpty ?? true) data['attachments'] = attachments;
+
+    return {
+      'topic': topic,
+      'set': {'data': data}
+    };
+  }
+}

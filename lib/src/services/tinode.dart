@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tinode/src/models/moment.dart';
 
 import 'package:tinode/src/models/packet-types.dart' as packet_types;
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
@@ -173,6 +174,13 @@ class TinodeService {
     if (topic != null) {
       topic.routeInfo(info);
     }
+  }
+
+  void handleMomentMessage(MomentMessage? moment) {
+    if (moment == null) return;
+
+    final topic = getTopic(moment.topic);
+    if (topic != null) topic.routeMoment(moment);
   }
 
   /// Sends a packet using connection service
@@ -373,6 +381,10 @@ class TinodeService {
   Future publishMessage(Message message) {
     message.resetLocalValues();
     return _send(message.asPubPacket());
+  }
+
+  Future publishMoment(SetMoment moment) {
+    return _send(moment.asMomentPacket());
   }
 
   /// Request topic metadata

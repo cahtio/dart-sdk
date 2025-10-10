@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tinode/src/models/moment.dart';
 import 'dart:math';
 
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
@@ -32,8 +33,14 @@ class TopicMe extends Topic {
   PublishSubject<List<Credential>> onCredsUpdated =
       PublishSubject<List<Credential>>();
 
+  final onMomentsUpdated = PublishSubject<List<Moment>>();
+
   // Credentials such as email or phone number.
   List<Credential> _credentials = [];
+
+  final _moments = <Moment>[];
+
+  List<Moment> get moments => _moments;
 
   /// Tinode service, responsible for handling messages, preparing packets and sending them
   late TinodeService _tinodeService;
@@ -367,8 +374,18 @@ class TopicMe extends Topic {
   }
 
   @override
+  void routeMoment(MomentMessage moment) {
+    _moments.addAll(moment.moments);
+    onMomentsUpdated.add(_moments);
+  }
+
+  @override
   Future<CtrlMessage> publishMessage(Message a) {
     return Future.error(Exception("Publishing to 'me' is not supported"));
+  }
+
+  Future publishMoment(SetMoment moment) {
+    return _tinodeService.publishMoment(moment);
   }
 
   /// Delete validation credential
