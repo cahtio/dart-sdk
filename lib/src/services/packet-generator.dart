@@ -114,6 +114,9 @@ class PacketGenerator {
       case packet_types.Moment:
         packetData = MomentPacketData(topic: topicName ?? '', content: '');
         break;
+      case packet_types.GetMoment:
+        packetData = GetMomentsPacketData(topic: topicName ?? '');
+        break;
       default:
         packetData = null as dynamic;
     }

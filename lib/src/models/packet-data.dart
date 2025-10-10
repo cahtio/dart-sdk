@@ -260,3 +260,34 @@ class MomentPacketData extends PacketData {
     };
   }
 }
+
+class GetMomentsPacketData extends PacketData {
+  String topic;
+  String? user;
+  int? since;
+  int? before;
+  int? limit;
+
+  GetMomentsPacketData({
+    required this.topic,
+    this.user,
+    this.since,
+    this.before,
+    this.limit,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    final data = <String, dynamic>{};
+
+    if (user != null) data['user'] = user;
+    if (since != null) data['since'] = since;
+    if (before != null) data['before'] = before;
+    if (limit != null) data['limit'] = limit;
+
+    return {
+      'topic': topic,
+      'get': {'data': data}
+    };
+  }
+}

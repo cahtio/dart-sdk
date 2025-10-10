@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tinode/src/models/moment.dart';
+import 'package:tinode/src/models/packet-data.dart';
 import 'dart:math';
 
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
@@ -386,6 +387,22 @@ class TopicMe extends Topic {
 
   Future publishMoment(SetMoment moment) {
     return _tinodeService.publishMoment(moment);
+  }
+
+  // 获取朋友圈列表
+  Future<void> getMomentsList({
+    String? user,
+    int? since,
+    int? before,
+    int? limit,
+  }) async {
+    await _tinodeService.getMoments(
+      topic: name ?? '',
+      user: user,
+      since: since,
+      before: before,
+      limit: limit,
+    );
   }
 
   /// Delete validation credential

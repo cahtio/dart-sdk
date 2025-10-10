@@ -33,9 +33,107 @@ class SetMoment {
   }
 }
 
+class PhotoData {
+  final String data;
+  final String type;
+
+  PhotoData({required this.data, required this.type});
+
+  factory PhotoData.fromMessage(Map<String, dynamic> msg) {
+    return PhotoData(
+      data: msg['data'] ?? '',
+      type: msg['type'] ?? '',
+    );
+  }
+}
+
+class PublicData {
+  final String fn;
+  final PhotoData? photo;
+
+  PublicData({required this.fn, this.photo});
+
+  factory PublicData.fromMessage(Map<String, dynamic> msg) {
+    return PublicData(
+      fn: msg['fn'] ?? '',
+      photo: msg['photo'] != null ? PhotoData.fromMessage(msg['photo']) : null,
+    );
+  }
+}
+
+class OwnerUser {
+  final String id;
+  final PublicData public;
+
+  OwnerUser({required this.id, required this.public});
+
+  factory OwnerUser.fromMessage(Map<String, dynamic> msg) {
+    return OwnerUser(
+      id: msg['id'] ?? '',
+      public: PublicData.fromMessage(msg['public'] ?? {}),
+    );
+  }
+}
+
 class Moment {
   final int id;
   final DateTime createdAt;
+  final DateTime updatedAt;
+  final String userId;
+  final String content;
+  final int privacy;
+  final bool isOwner;
+  final int? likeCount;
+  final int? shareCount;
+  final int? viewCount;
+  final bool? isShared;
+  final int? commentCount;
+  final String? shareFromId;
+  final Moment? shareFromMoment;
+  final OwnerUser? ownerUser;
+  final List<String>? attachments;
 
-  Moment({required this.id, required this.createdAt});
+  Moment({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.userId,
+    required this.content,
+    required this.privacy,
+    required this.isOwner,
+    this.likeCount,
+    this.shareCount,
+    this.viewCount,
+    this.isShared,
+    this.commentCount,
+    this.shareFromId,
+    this.shareFromMoment,
+    this.ownerUser,
+    this.attachments,
+  });
+
+  factory Moment.fromMessage(Map<String, dynamic> msg) {
+    return Moment(
+      id: msg['id'],
+      createdAt: DateTime.parse(msg['createdAt']),
+      updatedAt: DateTime.parse(msg['updatedAt']),
+      userId: msg['userId'] ?? '',
+      content: msg['content'] ?? '',
+      privacy: msg['privacy'] ?? 0,
+      isOwner: msg['isOwner'] ?? false,
+      likeCount: msg['likeCount'],
+      shareCount: msg['shareCount'],
+      viewCount: msg['viewCount'],
+      isShared: msg['isShared'],
+      commentCount: msg['commentCount'],
+      shareFromId: msg['shareFromId'],
+      shareFromMoment: msg['shareFromMoment'] != null
+          ? Moment.fromMessage(msg['shareFromMoment'])
+          : null,
+      ownerUser: msg['ownerUser'] != null
+          ? OwnerUser.fromMessage(msg['ownerUser'])
+          : null,
+      attachments: (msg['attachments'] as List<dynamic>?)?.cast<String>(),
+    );
+  }
 }

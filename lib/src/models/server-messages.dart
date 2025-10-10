@@ -284,18 +284,23 @@ class InfoMessage {
 }
 
 class MomentMessage {
-  final int id;
+  final String id;
   final String topic;
   final List<Moment> moments;
 
   MomentMessage({required this.id, required this.topic, required this.moments});
 
   factory MomentMessage.fromMessage(Map<String, dynamic> msg) {
-    // List<dynamic> s = msg['moments'];
-    // final moments = <Moment>[];
-    // for(final i in s) {
-    //   moments.add(Moment.fromMessage(i));
-    // }
-    return MomentMessage(id: 1, topic: '', moments: List.empty());
+    final momentsList = msg['moments'] as List<dynamic>? ?? [];
+    final moments = momentsList
+        .map((momentData) =>
+            Moment.fromMessage(momentData as Map<String, dynamic>))
+        .toList();
+
+    return MomentMessage(
+      id: msg['id']?.toString() ?? '',
+      topic: msg['topic'] ?? '',
+      moments: moments,
+    );
   }
 }

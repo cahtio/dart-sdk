@@ -9,3 +9,4 @@ const String Set = 'set';
 const String Del = 'del';
 const String Note = 'note';
 const String Moment = 'moment';
+const String GetMoment = 'moment_res';

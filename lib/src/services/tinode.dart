@@ -387,6 +387,26 @@ class TinodeService {
     return _send(moment.asMomentPacket());
   }
 
+  Future<void> getMoments({
+    required String topic,
+    String? user,
+    int? since,
+    int? before,
+    int? limit,
+  }) async {
+    final data = GetMomentsPacketData(
+      topic: topic,
+      user: user,
+      since: since,
+      before: before,
+      limit: limit,
+    );
+
+    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+
+    await _send(packet);
+  }
+
   /// Request topic metadata
   Future getMeta(String topicName, GetQuery params) {
     var packet = _packetGenerator.generate(packet_types.Get, topicName);
