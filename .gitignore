@@ -12,3 +12,7 @@ build/
 # Directory created by dartdoc
 doc/api/
 .idea/
+
+# macOS system files
+.DS_Store
+*/.DS_Store

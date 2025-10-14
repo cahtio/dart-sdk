@@ -26,6 +26,7 @@ import 'package:tinode/src/models/get-query.dart';
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/services/tinode.dart';
 import 'package:tinode/src/models/message.dart';
+import 'package:tinode/src/models/moment.dart';
 import 'package:tinode/src/services/tools.dart';
 import 'package:tinode/src/services/auth.dart';
 import 'package:tinode/src/topic-fnd.dart';
@@ -42,10 +43,11 @@ export 'package:tinode/src/models/account-params.dart';
 export 'package:tinode/src/models/message-status.dart';
 export 'package:tinode/src/models/contact-update.dart';
 export 'package:tinode/src/models/app-settings.dart';
-export 'package:tinode/src/models/packet-types.dart';
+export 'package:tinode/src/models/packet-types.dart' hide Moment;
 export 'package:tinode/src/models/packet-data.dart';
 export 'package:tinode/src/models/auth-token.dart';
 export 'package:tinode/src/models/access-mode.dart' hide NONE, READ;
+export 'package:tinode/src/models/moment.dart';
 
 // export 'package:tinode/src/models/auth-token.dart';
 export 'package:tinode/src/models/credential.dart';
@@ -398,6 +400,26 @@ class Tinode {
   /// Publish message to topic. The message should be created by `createMessage`
   Future publishMessage(Message message) {
     return _tinodeService.publishMessage(message);
+  }
+  
+  Future publishMoment(SetMoment moment) {
+    return _tinodeService.publishMoment(moment);
+  }
+  
+  Future<void> getMoments({
+    required String topic,
+    String? user,
+    int? since,
+    int? before,
+    int? limit,
+  }) {
+    return _tinodeService.getMoments(
+      topic: topic,
+      user: user,
+      since: since,
+      before: before,
+      limit: limit,
+    );
   }
 
   /// Request topic metadata
