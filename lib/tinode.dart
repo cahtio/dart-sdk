@@ -436,6 +436,15 @@ class Tinode {
     return ctrl;
   }
 
+  Future videoCall(
+      {required String topicName,
+      required String event,
+      required int seq,
+      required dynamic playload}) {
+    return _tinodeService.videoCall(
+        topicName: topicName, event: event, seq: seq, playload: playload);
+  }
+
   /// Notify server that a message or messages were read or received. Does NOT return promise
   void note(String topicName, String what, int seq) {
     _tinodeService.note(topicName, what, seq);

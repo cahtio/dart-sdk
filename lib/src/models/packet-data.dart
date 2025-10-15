@@ -219,15 +219,25 @@ class NotePacketData extends PacketData {
   String? topic;
   String? what;
   dynamic seq;
+  String? event;
+  dynamic payload;
 
-  NotePacketData({this.topic, this.what, this.seq});
+  NotePacketData({this.topic, this.what, this.seq, this.event, this.payload});
 
   @override
   Map<String, dynamic> toMap() {
-    return {
+    final map = {
       'topic': topic,
       'what': what,
       'seq': seq,
+      'event': event,
+      'payload': payload
     };
+    final nonullMap = <String, dynamic>{};
+    map.forEach((key, value) {
+      if (value == null) return;
+      nonullMap[key] = value;
+    });
+    return nonullMap;
   }
 }

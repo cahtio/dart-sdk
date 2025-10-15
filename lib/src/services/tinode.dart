@@ -483,6 +483,21 @@ class TinodeService {
     return _send(packet);
   }
 
+  Future videoCall(
+      {required String topicName,
+      required String event,
+      required int seq,
+      required dynamic playload}) {
+    final packet = _packetGenerator.generate(packet_types.Note, topicName);
+    final data = packet.data as NotePacketData;
+    data.what = 'call';
+    data.seq = seq;
+    data.event = event;
+    data.payload = playload;
+    packet.data = data;
+    return _send(packet);
+  }
+
   /// Notify server that a message or messages were read or received. Does NOT return promise
   Future note(String topicName, String what, int seq) {
     if (seq <= 0 || seq >= _configService.appSettings.localSeqId) {
