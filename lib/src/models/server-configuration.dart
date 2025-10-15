@@ -7,7 +7,7 @@ class ServerConfiguration {
   final int? maxTagLength;
   final int? minTagLength;
   final String? ver;
-  final List<IceServer>? iceServers;
+  final dynamic iceServers;
 
   ServerConfiguration({
     this.build,
@@ -20,21 +20,4 @@ class ServerConfiguration {
     this.ver,
     this.iceServers,
   });
-}
-
-class IceServer {
-  final List<String> urls;
-  final String? username;
-  final String? credential;
-
-  IceServer({
-    required this.urls,
-    this.username,
-    this.credential,
-  });
-
-  IceServer.fromJson(Map<String, dynamic> json)
-      : urls = List<String>.from(json['urls']),
-        username = json['username'] as String?,
-        credential = json['credential'] as String?;
 }
