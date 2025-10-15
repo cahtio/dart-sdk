@@ -405,22 +405,6 @@ class Tinode {
   Future publishMoment(SetMoment moment) {
     return _tinodeService.publishMoment(moment);
   }
-  
-  Future<void> getMoments({
-    required String topic,
-    String? user,
-    int? since,
-    int? before,
-    int? limit,
-  }) {
-    return _tinodeService.getMoments(
-      topic: topic,
-      user: user,
-      since: since,
-      before: before,
-      limit: limit,
-    );
-  }
 
   /// Request topic metadata
   Future getMeta(String topicName, GetQuery params) {

@@ -88,7 +88,7 @@ class Moment {
   final int? viewCount;
   final bool? isShared;
   final int? commentCount;
-  final String? shareFromId;
+  final int? shareFromId;
   final Moment? shareFromMoment;
   final OwnerUser? ownerUser;
   final List<String>? attachments;
@@ -113,10 +113,15 @@ class Moment {
   });
 
   factory Moment.fromMessage(Map<String, dynamic> msg) {
+    print("fromMessage ${msg['id']} ${msg['createdAt']}");
     return Moment(
       id: msg['id'],
-      createdAt: DateTime.parse(msg['createdAt']),
-      updatedAt: DateTime.parse(msg['updatedAt']),
+      createdAt: msg['createdAt'] != null
+          ? DateTime.parse(msg['createdAt'])
+          : DateTime.now(),
+      updatedAt: msg['updatedAt'] != null
+          ? DateTime.parse(msg['updatedAt'])
+          : DateTime.now(),
       userId: msg['userId'] ?? '',
       content: msg['content'] ?? '',
       privacy: msg['privacy'] ?? 0,

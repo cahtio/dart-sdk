@@ -34,14 +34,12 @@ class TopicMe extends Topic {
   PublishSubject<List<Credential>> onCredsUpdated =
       PublishSubject<List<Credential>>();
 
-  final onMomentsUpdated = PublishSubject<List<Moment>>();
+  PublishSubject<List<Moment>> onMomentsUpdated = PublishSubject<List<Moment>>();
+  List<Moment> _moments = <Moment>[];
+  // static const momentsKey = 'moments';
 
   // Credentials such as email or phone number.
   List<Credential> _credentials = [];
-
-  final _moments = <Moment>[];
-
-  List<Moment> get moments => _moments;
 
   /// Tinode service, responsible for handling messages, preparing packets and sending them
   late TinodeService _tinodeService;
@@ -376,8 +374,16 @@ class TopicMe extends Topic {
 
   @override
   void routeMoment(MomentMessage moment) {
-    _moments.addAll(moment.moments);
-    onMomentsUpdated.add(_moments);
+
+    // print('routeMoment ${moment.moments.toList().map((e) => e.id)}');
+    _moments = moment.moments;
+    onMomentsUpdated.add(moment.moments);
+    
+    // if(_authService.userId != null) {
+    //   print('_tinodeService.userId! ${_authService.userId!} ${_moments.toList()}');
+    //   _cacheManager.put(momentsKey, _authService.userId!, _moments.toList());
+    // }
+    
   }
 
   @override
@@ -390,14 +396,15 @@ class TopicMe extends Topic {
   }
 
   // 获取朋友圈列表
-  Future<void> getMomentsList({
+  Future<void> touchGetMoments({
+    required String topic,
     String? user,
     int? since,
     int? before,
     int? limit,
   }) async {
-    await _tinodeService.getMoments(
-      topic: name ?? '',
+    await _tinodeService.touchGetMoments(
+      topic: topic,
       user: user,
       since: since,
       before: before,
@@ -538,6 +545,20 @@ class TopicMe extends Topic {
   /// Get the user's credentials: email, phone, etc.
   List<Credential> getCredentials() {
     return _credentials;
+  }
+
+  /// Get All Moments or Get Moments of a topicName, from cache
+  List<Moment>? getMomentsOrByUserId(String? topicName) {
+
+    // if(_moments.isEmpty && _authService.userId != null){
+    //   _moments = _cacheManager.get(momentsKey, _authService.userId!) ?? [];
+    //   print('getMoments ${_authService.userId} ${_moments.toList()}');
+    // }
+    
+    if(topicName == null) {
+      return _moments;
+    }
+    return _moments.where((moment) => moment.userId == topicName).toList();
   }
 
   void _updateCached(TopicDescription object) {

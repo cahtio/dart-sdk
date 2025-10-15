@@ -387,7 +387,7 @@ class TinodeService {
     return _send(moment.asMomentPacket());
   }
 
-  Future<void> getMoments({
+  Future<void> touchGetMoments({
     required String topic,
     String? user,
     int? since,
