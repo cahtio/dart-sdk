@@ -113,7 +113,6 @@ class Moment {
   });
 
   factory Moment.fromMessage(Map<String, dynamic> msg) {
-    print("fromMessage ${msg['id']} ${msg['createdAt']}");
     return Moment(
       id: msg['id'],
       createdAt: msg['createdAt'] != null

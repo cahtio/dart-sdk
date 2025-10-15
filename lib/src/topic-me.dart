@@ -376,8 +376,19 @@ class TopicMe extends Topic {
   void routeMoment(MomentMessage moment) {
 
     // print('routeMoment ${moment.moments.toList().map((e) => e.id)}');
-    _moments = moment.moments;
-    onMomentsUpdated.add(moment.moments);
+    if(moment.moments.isNotEmpty && _moments.isNotEmpty) {
+      if(moment.moments.first.id > _moments.last.id) {
+        _moments.addAll(moment.moments);
+      } else if(moment.moments.last.id < _moments.first.id) {
+        _moments.insertAll(0, moment.moments);
+      }
+    }else if(moment.moments.isNotEmpty && _moments.isEmpty) {
+        _moments = moment.moments;
+    }
+    
+    // print('_routeMoment ${_moments.toList().map((e) => e.id)}');
+    //  _moments = moment.moments;
+    onMomentsUpdated.add(_moments);
     
     // if(_authService.userId != null) {
     //   print('_tinodeService.userId! ${_authService.userId!} ${_moments.toList()}');
