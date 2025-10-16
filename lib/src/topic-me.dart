@@ -377,9 +377,9 @@ class TopicMe extends Topic {
 
     // print('routeMoment ${moment.moments.toList().map((e) => e.id)}');
     if(moment.moments.isNotEmpty && _moments.isNotEmpty) {
-      if(moment.moments.first.id > _moments.last.id) {
+      if(moment.moments.first.id < _moments.last.id) {
         _moments.addAll(moment.moments);
-      } else if(moment.moments.last.id < _moments.first.id) {
+      } else{
         _moments.insertAll(0, moment.moments);
       }
     }else if(moment.moments.isNotEmpty && _moments.isEmpty) {
