@@ -183,6 +183,13 @@ class TinodeService {
     if (topic != null) topic.routeMoment(moment);
   }
 
+  void handleCommentMessage(CommentMessage? commentMessage) {
+    if (commentMessage == null) return;
+
+    final topic = getTopic(commentMessage.topic);
+    if (topic != null) topic.routeComments(commentMessage);
+  }
+
   /// Sends a packet using connection service
   Future<dynamic> _send(Packet pkt) {
     var future = Future<dynamic>.value(null);
@@ -387,6 +394,11 @@ class TinodeService {
     return _send(moment.asMomentPacket());
   }
 
+  /// 发表评论
+  Future publishComment(SetComment comment) {
+    return _send(comment.asCommentPacket());
+  }
+
   Future<void> touchGetMoments({
     required String topic,
     String? user,
@@ -405,6 +417,84 @@ class TinodeService {
     final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
 
     await _send(packet);
+  }
+
+  // 获取评论列表
+  Future<void> getComments({
+    required String topic,
+    required int momId,
+    int? since,
+    int? before,
+    int? limit,
+  }) async {
+    final data = GetCommentsPacketData(
+      topic: topic,
+      momId: momId,
+      since: since,
+      before: before,
+      limit: limit,
+    );
+
+    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+
+    await _send(packet);
+  }
+
+  /// 删除评论
+  Future<CtrlMessage> deleteComment({
+    required String topic,
+    required int momId,
+    required int commentId,
+  }) async {
+    final data = DeleteCommentPacketData(
+      topic: topic,
+      momId: momId,
+      commentId: commentId,
+    );
+
+    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+
+    final response = await _send(packet);
+    return CtrlMessage.fromMessage(response);
+  }
+
+  /// 点赞或取消点赞动态
+  /// [topic] 话题名称
+  /// [momId] 动态ID
+  /// [action] 操作类型：1表示点赞，0表示取消点赞
+  Future<CtrlMessage> likeMoment({
+    required String topic,
+    required int momId,
+    required int action,
+  }) async {
+    final data = LikeMomentPacketData(
+      topic: topic,
+      momId: momId,
+      action: action,
+    );
+
+    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+
+    final response = await _send(packet);
+    return CtrlMessage.fromMessage(response);
+  }
+
+  /// 删除朋友圈动态
+  /// [topic] 话题名称
+  /// [momId] 动态ID
+  Future<CtrlMessage> deleteMoment({
+    required String topic,
+    required int momId,
+  }) async {
+    final data = DeleteMomentPacketData(
+      topic: topic,
+      momId: momId,
+    );
+
+    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+
+    final response = await _send(packet);
+    return CtrlMessage.fromMessage(response);
   }
 
   /// Request topic metadata

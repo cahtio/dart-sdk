@@ -117,6 +117,36 @@ class PacketGenerator {
       case packet_types.GetMoment:
         packetData = GetMomentsPacketData(topic: topicName ?? '');
         break;
+      case packet_types.GetComments:
+        packetData = GetCommentsPacketData(topic: topicName ?? '', momId: 0);
+        break;
+      case packet_types.Comment:
+        packetData = CommentPacketData(
+          topic: topicName ?? '',
+          momId: 0,
+          content: '',
+        );
+        break;
+      case packet_types.DeleteComment:
+        packetData = DeleteCommentPacketData(
+          topic: topicName ?? '',
+          momId: 0,
+          commentId: 0,
+        );
+        break;
+      case packet_types.LikeMoment:
+        packetData = LikeMomentPacketData(
+          topic: topicName ?? '',
+          momId: 0,
+          action: 1,
+        );
+        break;
+      case packet_types.DeleteMoment:
+        packetData = DeleteMomentPacketData(
+          topic: topicName ?? '',
+          momId: 0,
+        );
+        break;
       default:
         packetData = null as dynamic;
     }

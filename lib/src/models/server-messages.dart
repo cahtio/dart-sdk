@@ -12,9 +12,10 @@ class ServerMessage {
   final PresMessage? pres;
   final InfoMessage? info;
   final MomentMessage? moment;
+  final CommentMessage? comments;
 
   ServerMessage(
-      {this.ctrl, this.meta, this.data, this.pres, this.info, this.moment});
+      {this.ctrl, this.meta, this.data, this.pres, this.info, this.moment, this.comments});
 
   static ServerMessage fromMessage(Map<String, dynamic> msg) {
     return ServerMessage(
@@ -25,6 +26,9 @@ class ServerMessage {
       info: msg['info'] != null ? InfoMessage.fromMessage(msg['info']) : null,
       moment: msg['moment_res'] != null
           ? MomentMessage.fromMessage(msg['moment_res'])
+          : null,
+      comments: msg['moment_res'] != null && msg['moment_res']['moment_comments'] != null
+          ? CommentMessage.fromMessage(msg['moment_res'])
           : null,
     );
   }
@@ -301,6 +305,28 @@ class MomentMessage {
       id: msg['id']?.toString() ?? '',
       topic: msg['topic'] ?? '',
       moments: moments,
+    );
+  }
+}
+
+class CommentMessage {
+  final String id;
+  final String topic;
+  final List<MomentComment> comments;
+
+  CommentMessage({required this.id, required this.topic, required this.comments});
+
+  factory CommentMessage.fromMessage(Map<String, dynamic> msg) {
+    final commentsList = msg['moment_comments'] as List<dynamic>? ?? [];
+    final comments = commentsList
+        .map((commentData) =>
+            MomentComment.fromMessage(commentData as Map<String, dynamic>))
+        .toList();
+
+    return CommentMessage(
+      id: msg['id']?.toString() ?? '',
+      topic: msg['topic'] ?? '',
+      comments: comments,
     );
   }
 }

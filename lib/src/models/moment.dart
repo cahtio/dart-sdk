@@ -33,6 +33,39 @@ class SetMoment {
   }
 }
 
+class SetComment {
+  String topic;
+  int momId;
+  String content;
+  int? topId;
+  int? parentId;
+  List<String>? attachments;
+
+  late PacketGenerator _packetGenerator;
+
+  SetComment({
+    required this.topic,
+    required this.momId,
+    required this.content,
+    this.topId,
+    this.parentId,
+    this.attachments,
+  }) {
+    _packetGenerator = GetIt.I.get<PacketGenerator>();
+  }
+
+  Packet asCommentPacket() {
+    var packet = _packetGenerator.generate(packet_types.Moment, topic);
+    var data = packet.data as CommentPacketData;
+    data.momId = momId;
+    data.content = content;
+    data.topId = topId;
+    data.parentId = parentId;
+    data.attachments = attachments;
+    return packet;
+  }
+}
+
 class PhotoData {
   final String data;
   final String type;
@@ -71,6 +104,37 @@ class OwnerUser {
     return OwnerUser(
       id: msg['id'] ?? '',
       public: PublicData.fromMessage(msg['public'] ?? {}),
+    );
+  }
+}
+
+class MomentComment {
+  final int id;
+  final int momentId;
+  final String userId;
+  final DateTime createdAt;
+  final String content;
+  final OwnerUser? user;
+
+  MomentComment({
+    required this.id,
+    required this.momentId,
+    required this.userId,
+    required this.createdAt,
+    required this.content,
+    this.user,
+  });
+
+  factory MomentComment.fromMessage(Map<String, dynamic> msg) {
+    return MomentComment(
+      id: msg['id'],
+      momentId: msg['momentId'],
+      userId: msg['userId'] ?? '',
+      createdAt: msg['createdAt'] != null
+          ? DateTime.parse(msg['createdAt'])
+          : DateTime.now(),
+      content: msg['content'] ?? '',
+      user: msg['user'] != null ? OwnerUser.fromMessage(msg['user']) : null,
     );
   }
 }

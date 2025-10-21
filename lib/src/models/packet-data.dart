@@ -291,3 +291,142 @@ class GetMomentsPacketData extends PacketData {
     };
   }
 }
+
+class GetCommentsPacketData extends PacketData {
+  String topic;
+  int momId;
+  int? since;
+  int? before;
+  int? limit;
+
+  GetCommentsPacketData({
+    required this.topic,
+    required this.momId,
+    this.since,
+    this.before,
+    this.limit,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    final comments = <String, dynamic>{
+      'momId': momId,
+    };
+
+    if (since != null) comments['since'] = since;
+    if (before != null) comments['before'] = before;
+    if (limit != null) comments['limit'] = limit;
+
+    return {
+      'topic': topic,
+      'get': {'comments': comments}
+    };
+  }
+}
+
+class CommentPacketData extends PacketData {
+  String topic;
+  int momId;
+  String content;
+  int? topId;
+  int? parentId;
+  List<String>? attachments;
+
+  CommentPacketData({
+    required this.topic,
+    required this.momId,
+    required this.content,
+    this.topId,
+    this.parentId,
+    this.attachments,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    final comment = <String, dynamic>{
+      'momId': momId,
+      'content': content,
+    };
+
+    if (topId != null) comment['topId'] = topId;
+    if (parentId != null) comment['parentId'] = parentId;
+    if (attachments != null && attachments!.isNotEmpty) {
+      comment['attachments'] = attachments;
+    }
+
+    return {
+      'topic': topic,
+      'set': {'comment': comment}
+    };
+  }
+}
+
+class DeleteCommentPacketData extends PacketData {
+  String topic;
+  int momId;
+  int commentId;
+
+  DeleteCommentPacketData({
+    required this.topic,
+    required this.momId,
+    required this.commentId,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'topic': topic,
+      'del': {
+        'what': 'comment',
+        'id': commentId,
+        'momId': momId,
+      }
+    };
+  }
+}
+
+class LikeMomentPacketData extends PacketData {
+  String topic;
+  int momId;
+  int action;
+
+  LikeMomentPacketData({
+    required this.topic,
+    required this.momId,
+    required this.action,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'topic': topic,
+      'set': {
+        'like': {
+          'momId': momId,
+          'action': action,
+        }
+      }
+    };
+  }
+}
+
+class DeleteMomentPacketData extends PacketData {
+  String topic;
+  int momId;
+
+  DeleteMomentPacketData({
+    required this.topic,
+    required this.momId,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'topic': topic,
+      'del': {
+        'what': 'moment',
+        'id': momId,
+      }
+    };
+  }
+}

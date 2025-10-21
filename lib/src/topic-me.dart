@@ -1,7 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tinode/src/models/moment.dart';
-import 'package:tinode/src/models/packet-data.dart';
 import 'dart:math';
 
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
@@ -37,6 +36,11 @@ class TopicMe extends Topic {
   PublishSubject<List<Moment>> onMomentsUpdated = PublishSubject<List<Moment>>();
   List<Moment> _moments = <Moment>[];
   // static const momentsKey = 'moments';
+
+  /// This event will be triggered when comments are updated
+  PublishSubject<List<MomentComment>> onCommentsUpdated = 
+      PublishSubject<List<MomentComment>>();
+  Map<int, List<MomentComment>> _commentsMap = {};
 
   // Credentials such as email or phone number.
   List<Credential> _credentials = [];
@@ -397,6 +401,37 @@ class TopicMe extends Topic {
     
   }
 
+  /// 处理评论列表响应
+  void routeComments(CommentMessage commentMessage) {
+    if (commentMessage.comments.isEmpty) {
+      return;
+    }
+
+    // 获取第一个评论的 momentId，假设所有评论都属于同一个动态
+    int momentId = commentMessage.comments.first.momentId;
+    
+    // 将评论存储到 map 中
+    if (_commentsMap.containsKey(momentId)) {
+      // 如果已经有该动态的评论，合并列表
+      var existingComments = _commentsMap[momentId]!;
+      var newComments = commentMessage.comments;
+      
+      // 简单合并，去重可以根据需求添加
+      for (var comment in newComments) {
+        if (!existingComments.any((c) => c.id == comment.id)) {
+          existingComments.add(comment);
+        }
+      }
+      existingComments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    } else {
+      // 如果是新的动态评论，直接添加
+      _commentsMap[momentId] = List.from(commentMessage.comments);
+    }
+    
+    // 触发更新事件
+    onCommentsUpdated.add(_commentsMap[momentId]!);
+  }
+
   @override
   Future<CtrlMessage> publishMessage(Message a) {
     return Future.error(Exception("Publishing to 'me' is not supported"));
@@ -404,6 +439,32 @@ class TopicMe extends Topic {
 
   Future publishMoment(SetMoment moment) {
     return _tinodeService.publishMoment(moment);
+  }
+
+  /// 发表评论
+  /// [momId] 动态ID
+  /// [content] 评论内容
+  /// [topId] 顶级评论ID（可选，用于多级回复）
+  /// [parentId] 父评论ID（可选，用于多级回复）
+  /// [attachments] 附件列表（可选）
+  Future<CtrlMessage> publishComment({
+    required int momId,
+    required String content,
+    int? topId,
+    int? parentId,
+    List<String>? attachments,
+  }) async {
+    final comment = SetComment(
+      topic: topic_names.TOPIC_ME,
+      momId: momId,
+      content: content,
+      topId: topId,
+      parentId: parentId,
+      attachments: attachments,
+    );
+    
+    final response = await _tinodeService.publishComment(comment);
+    return CtrlMessage.fromMessage(response);
   }
 
   // 获取朋友圈列表
@@ -421,6 +482,88 @@ class TopicMe extends Topic {
       before: before,
       limit: limit,
     );
+  }
+
+  /// 获取评论列表
+  /// [momId] 动态ID，必填
+  /// [since] 从哪个ID开始查，可选
+  /// [before] 从哪个ID之前查，可选
+  /// [limit] 获取数量限制，可选
+  Future<void> getComments({
+    required int momId,
+    int? since,
+    int? before,
+    int? limit,
+  }) async {
+    await _tinodeService.getComments(
+      topic: topic_names.TOPIC_ME,
+      momId: momId,
+      since: since,
+      before: before,
+      limit: limit,
+    );
+  }
+
+  /// 删除评论
+  /// [momId] 动态ID
+  /// [commentId] 评论ID
+  Future<CtrlMessage> deleteComment({
+    required int momId,
+    required int commentId,
+  }) async {
+    final response = await _tinodeService.deleteComment(
+      topic: topic_names.TOPIC_ME,
+      momId: momId,
+      commentId: commentId,
+    );
+    
+    // 从本地缓存中删除该评论
+    if (_commentsMap.containsKey(momId)) {
+      _commentsMap[momId]?.removeWhere((comment) => comment.id == commentId);
+      // 触发更新事件
+      onCommentsUpdated.add(_commentsMap[momId] ?? []);
+    }
+    
+    return response;
+  }
+
+  /// 点赞或取消点赞动态
+  /// [momId] 动态ID
+  /// [action] 操作类型：1表示点赞，0表示取消点赞
+  Future<CtrlMessage> likeMoment({
+    required int momId,
+    required int action,
+  }) async {
+    final response = await _tinodeService.likeMoment(
+      topic: topic_names.TOPIC_ME,
+      momId: momId,
+      action: action,
+    );
+    
+    return response;
+  }
+
+  /// 删除朋友圈动态
+  /// [momId] 动态ID
+  Future<CtrlMessage> deleteMoment({
+    required int momId,
+  }) async {
+    final response = await _tinodeService.deleteMoment(
+      topic: topic_names.TOPIC_ME,
+      momId: momId,
+    );
+    
+    // 从本地缓存中删除该动态
+    _moments.removeWhere((moment) => moment.id == momId);
+    // 触发更新事件
+    onMomentsUpdated.add(_moments);
+    
+    // 同时删除该动态的所有评论
+    if (_commentsMap.containsKey(momId)) {
+      _commentsMap.remove(momId);
+    }
+    
+    return response;
   }
 
   /// Delete validation credential
@@ -570,6 +713,13 @@ class TopicMe extends Topic {
       return _moments;
     }
     return _moments.where((moment) => moment.userId == topicName).toList();
+  }
+
+  /// 获取指定动态的评论列表（从缓存）
+  /// [momentId] 动态ID
+  /// 返回该动态的评论列表，如果不存在则返回空列表
+  List<MomentComment> getCommentsByMomentId(int momentId) {
+    return _commentsMap[momentId] ?? [];
   }
 
   void _updateCached(TopicDescription object) {

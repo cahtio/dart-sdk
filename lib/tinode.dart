@@ -235,6 +235,8 @@ class Tinode {
       _tinodeService.handleInfoMessage(message.info);
     } else if (message.moment != null) {
       _tinodeService.handleMomentMessage(message.moment);
+    } else if (message.comments != null) {
+      _tinodeService.handleCommentMessage(message.comments);
     }
   }
 
