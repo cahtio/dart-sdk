@@ -55,7 +55,7 @@ class SetComment {
   }
 
   Packet asCommentPacket() {
-    var packet = _packetGenerator.generate(packet_types.Moment, topic);
+    var packet = _packetGenerator.generate(packet_types.Comment, topic);
     var data = packet.data as CommentPacketData;
     data.momId = momId;
     data.content = content;

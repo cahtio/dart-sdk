@@ -415,7 +415,7 @@ class TinodeService {
       limit: limit,
     );
 
-    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
     await _send(packet);
   }
@@ -436,7 +436,7 @@ class TinodeService {
       limit: limit,
     );
 
-    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+    final packet = Packet(packet_types.GetComments, data, Tools.getNextUniqueId());
 
     await _send(packet);
   }
