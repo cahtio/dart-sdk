@@ -395,8 +395,9 @@ class Tinode {
   }
 
   /// Create message draft without sending it to the server
-  Message createMessage(String topicName, dynamic data, bool echo) {
-    return _tinodeService.createMessage(topicName, data, echo);
+  Message createMessage(String topicName, dynamic data, bool echo,
+      {dynamic head = null}) {
+    return _tinodeService.createMessage(topicName, data, echo, head: head);
   }
 
   /// Publish message to topic. The message should be created by `createMessage`
@@ -443,6 +444,15 @@ class Tinode {
     var ctrl = _tinodeService.deleteCurrentUser(hard);
     _authService.setUserId(null);
     return ctrl;
+  }
+
+  Future videoCall(
+      {required String topicName,
+      required String event,
+      required int seq,
+      required dynamic playload}) {
+    return _tinodeService.videoCall(
+        topicName: topicName, event: event, seq: seq, playload: playload);
   }
 
   /// Notify server that a message or messages were read or received. Does NOT return promise

@@ -11,7 +11,7 @@ class Packet {
   bool? cancelled;
   bool? noForwarding;
 
-  Packet(String name, PacketData data, String id) {
+  Packet(String name, PacketData data, [String? id = null]) {
     this.name = name;
     this.data = data;
     this.id = id;

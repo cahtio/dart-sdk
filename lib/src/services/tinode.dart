@@ -379,9 +379,10 @@ class TinodeService {
   }
 
   /// Create message draft without sending it to the server
-  Message createMessage(String topicName, dynamic data, bool? echo) {
+  Message createMessage(String topicName, dynamic data, bool? echo,
+      {dynamic head = null}) {
     echo ??= true;
-    return Message(topicName, data, echo);
+    return Message(topicName, data, echo, head: head);
   }
 
   /// Publish message to topic. The message should be created by `createMessage`
@@ -600,6 +601,21 @@ class TinodeService {
     var data = packet.data as DelPacketData;
     data.hard = hard;
     data.what = 'user';
+    packet.data = data;
+    return _send(packet);
+  }
+
+  Future videoCall(
+      {required String topicName,
+      required String event,
+      required int seq,
+      required dynamic playload}) {
+    final packet = _packetGenerator.generate(packet_types.Note, topicName);
+    final data = packet.data as NotePacketData;
+    data.what = 'call';
+    data.seq = seq;
+    data.event = event;
+    data.payload = playload;
     packet.data = data;
     return _send(packet);
   }

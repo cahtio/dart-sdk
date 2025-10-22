@@ -56,19 +56,14 @@ class ConfigService {
 
   void setServerConfiguration(Map<String, dynamic> configuration) {
     _serverConfiguration = ServerConfiguration(
-      build: configuration['build'],
-      maxFileUploadSize: configuration['maxFileUploadSize'],
-      maxMessageSize: configuration['maxMessageSize'],
-      maxSubscriberCount: configuration['maxSubscriberCount'],
-      maxTagCount: configuration['maxTagCount'],
-      maxTagLength: configuration['maxTagLength'],
-      minTagLength: configuration['minTagLength'],
-      ver: configuration['ver'],
-      iceServers: configuration['iceServers'] != null
-          ? (configuration['iceServers'] as List)
-              .map((e) => IceServer.fromJson(e))
-              .toList()
-          : null,
-    );
+        build: configuration['build'],
+        maxFileUploadSize: configuration['maxFileUploadSize'],
+        maxMessageSize: configuration['maxMessageSize'],
+        maxSubscriberCount: configuration['maxSubscriberCount'],
+        maxTagCount: configuration['maxTagCount'],
+        maxTagLength: configuration['maxTagLength'],
+        minTagLength: configuration['minTagLength'],
+        ver: configuration['ver'],
+        iceServers: configuration['iceServers']);
   }
 }

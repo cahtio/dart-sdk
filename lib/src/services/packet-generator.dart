@@ -151,6 +151,10 @@ class PacketGenerator {
         packetData = null as dynamic;
     }
 
-    return Packet(type, packetData, Tools.getNextUniqueId());
+    final packet = Packet(type, packetData);
+    if (type != packet_types.Note) {
+      packet.id = Tools.getNextUniqueId();
+    }
+    return packet;
   }
 }

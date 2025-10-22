@@ -18,12 +18,13 @@ class Message {
   String? topicName;
   bool? noForwarding;
   List<String>? attachments;
+  dynamic head;
 
   late PacketGenerator _packetGenerator;
 
   PublishSubject<int> onStatusChange = PublishSubject<int>();
 
-  Message(this.topicName, this.content, this.echo) {
+  Message(this.topicName, this.content, this.echo, {this.head = null}) {
     _status = message_status.NONE;
     _packetGenerator = GetIt.I.get<PacketGenerator>();
   }
@@ -33,6 +34,9 @@ class Message {
     var data = packet.data as PubPacketData;
     data.content = content;
     data.noecho = !echo;
+    if (head != null) {
+      data.head = head;
+    }
     packet.data = data;
     if (attachments != null) {
       packet.extra = {'attachments': attachments};

@@ -270,20 +270,20 @@ class InfoMessage {
   /// guaranteed 0 < read <= recv <= {ctrl.params.seq}; present for rcpt & read
   final int? seq;
 
-  InfoMessage({
-    this.topic,
-    this.from,
-    this.what,
-    this.seq,
-  });
+  final String? event;
+  final dynamic payload;
+
+  InfoMessage(
+      {this.topic, this.from, this.what, this.seq, this.event, this.payload});
 
   static InfoMessage fromMessage(Map<String, dynamic> msg) {
     return InfoMessage(
-      topic: msg['topic'],
-      from: msg['from'],
-      what: msg['what'],
-      seq: msg['seq'],
-    );
+        topic: msg['topic'],
+        from: msg['from'],
+        what: msg['what'],
+        seq: msg['seq'],
+        event: msg['event'],
+        payload: msg['payload']);
   }
 }
 
