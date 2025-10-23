@@ -23,7 +23,7 @@ class SetMoment {
   }
 
   Packet asMomentPacket() {
-    var packet = _packetGenerator.generate(packet_types.Moment, topic);
+    var packet = _packetGenerator.generate(packet_types.GetMoment, topic);
     var data = packet.data as MomentPacketData;
     data.content = content;
     if (privacy != null) data.privacy = privacy! ? 1 : 0;

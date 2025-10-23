@@ -4,6 +4,7 @@ import 'package:tinode/src/models/delete-transaction.dart';
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/access-mode.dart';
 import 'package:tinode/src/models/credential.dart';
+import 'package:tinode/tinode.dart' as packet_types;
 
 class ServerMessage {
   final CtrlMessage? ctrl;
@@ -24,10 +25,10 @@ class ServerMessage {
       data: msg['data'] != null ? DataMessage.fromMessage(msg['data']) : null,
       pres: msg['pres'] != null ? PresMessage.fromMessage(msg['pres']) : null,
       info: msg['info'] != null ? InfoMessage.fromMessage(msg['info']) : null,
-      moment: msg['moment_res'] != null
-          ? MomentMessage.fromMessage(msg['moment_res'])
+      moment: msg['moment_res'] != null && msg['moment_res'][packet_types.ResMoment] != null
+          ? MomentMessage.fromMessage(msg['moment_res']) 
           : null,
-      comments: msg['moment_res'] != null && msg['moment_res']['moment_comments'] != null
+      comments: msg['moment_res'] != null && msg['moment_res'][packet_types.ResComments] != null
           ? CommentMessage.fromMessage(msg['moment_res'])
           : null,
     );
@@ -317,12 +318,13 @@ class CommentMessage {
   CommentMessage({required this.id, required this.topic, required this.comments});
 
   factory CommentMessage.fromMessage(Map<String, dynamic> msg) {
-    final commentsList = msg['moment_comments'] as List<dynamic>? ?? [];
+    final commentsList = msg[packet_types.ResComments] as List<dynamic>? ?? [];
+   
     final comments = commentsList
         .map((commentData) =>
             MomentComment.fromMessage(commentData as Map<String, dynamic>))
         .toList();
-
+ print('CommentMessage.fromMessage1 $comments');
     return CommentMessage(
       id: msg['id']?.toString() ?? '',
       topic: msg['topic'] ?? '',

@@ -219,7 +219,6 @@ class Tinode {
 
     /// Decode map into model
     var message = ServerMessage.fromMessage(pkt);
-
     // Send complete packet to listener
     onMessage.add(message);
 

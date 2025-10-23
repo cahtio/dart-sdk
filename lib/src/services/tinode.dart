@@ -179,15 +179,15 @@ class TinodeService {
   void handleMomentMessage(MomentMessage? moment) {
     if (moment == null) return;
 
-    final topic = getTopic(moment.topic);
-    if (topic != null) topic.routeMoment(moment);
+    var topicMe = getTopic(topic_names.TOPIC_ME) as TopicMe;
+    topicMe.routeMoment(moment);
   }
 
   void handleCommentMessage(CommentMessage? commentMessage) {
     if (commentMessage == null) return;
 
-    final topic = getTopic(commentMessage.topic);
-    if (topic != null) topic.routeComments(commentMessage);
+    var topicMe = getTopic(topic_names.TOPIC_ME) as TopicMe;
+    topicMe.routeComments(commentMessage);
   }
 
   /// Sends a packet using connection service
@@ -400,7 +400,7 @@ class TinodeService {
     return _send(comment.asCommentPacket());
   }
 
-  Future<void> touchGetMoments({
+  Future touchGetMoments({
     required String topic,
     String? user,
     int? since,
@@ -415,13 +415,13 @@ class TinodeService {
       limit: limit,
     );
 
-    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
-    await _send(packet);
+    return _send(packet);
   }
 
   // 获取评论列表
-  Future<void> getComments({
+  Future getComments({
     required String topic,
     required int momId,
     int? since,
@@ -436,13 +436,13 @@ class TinodeService {
       limit: limit,
     );
 
-    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
-    await _send(packet);
+    return _send(packet);
   }
 
   /// 删除评论
-  Future<CtrlMessage> deleteComment({
+  Future deleteComment({
     required String topic,
     required int momId,
     required int commentId,
@@ -453,17 +453,16 @@ class TinodeService {
       commentId: commentId,
     );
 
-    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
-    final response = await _send(packet);
-    return CtrlMessage.fromMessage(response);
+    return _send(packet);
   }
 
   /// 点赞或取消点赞动态
   /// [topic] 话题名称
   /// [momId] 动态ID
   /// [action] 操作类型：1表示点赞，0表示取消点赞
-  Future<CtrlMessage> likeMoment({
+  Future likeMoment({
     required String topic,
     required int momId,
     required int action,
@@ -474,16 +473,15 @@ class TinodeService {
       action: action,
     );
 
-    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
-    final response = await _send(packet);
-    return CtrlMessage.fromMessage(response);
+    return _send(packet);
   }
 
   /// 删除朋友圈动态
   /// [topic] 话题名称
   /// [momId] 动态ID
-  Future<CtrlMessage> deleteMoment({
+  Future deleteMoment({
     required String topic,
     required int momId,
   }) async {
@@ -492,10 +490,10 @@ class TinodeService {
       momId: momId,
     );
 
-    final packet = Packet(packet_types.Moment, data, Tools.getNextUniqueId());
+    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
-    final response = await _send(packet);
-    return CtrlMessage.fromMessage(response);
+    return _send(packet);
+
   }
 
   /// Request topic metadata

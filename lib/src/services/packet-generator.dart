@@ -111,13 +111,13 @@ class PacketGenerator {
           what: null,
         );
         break;
-      case packet_types.Moment:
+      case packet_types.GetMoment:
         packetData = MomentPacketData(topic: topicName ?? '', content: '');
         break;
-      case packet_types.MomentRes:
+      case packet_types.ResMoment:
         packetData = GetMomentsPacketData(topic: topicName ?? '');
         break;
-      case packet_types.GetComments:
+      case packet_types.ResComments:
         packetData = GetCommentsPacketData(topic: topicName ?? '', momId: 0);
         break;
       case packet_types.Comment:
@@ -126,6 +126,7 @@ class PacketGenerator {
           momId: 0,
           content: '',
         );
+        type=packet_types.GetMoment;
         break;
       case packet_types.DeleteComment:
         packetData = DeleteCommentPacketData(

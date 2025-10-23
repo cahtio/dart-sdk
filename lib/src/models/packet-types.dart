@@ -8,9 +8,11 @@ const String Get = 'get';
 const String Set = 'set';
 const String Del = 'del';
 const String Note = 'note';
-const String Moment = 'moment';
-const String MomentRes = 'moment_res';
-const String GetComments = 'moment_comments';
+const String GetMoment = 'moment';
+
+const String Moment_Res = 'moment_res';
+const String ResMoment = 'moments';
+const String ResComments = 'moment_comments';
 const String Comment = 'comment';
 const String DeleteComment = 'delete_comment';
 const String LikeMoment = 'like_moment';

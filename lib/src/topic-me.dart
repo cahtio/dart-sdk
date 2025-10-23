@@ -376,19 +376,27 @@ class TopicMe extends Topic {
     onPres.add(pres);
   }
 
-  @override
   void routeMoment(MomentMessage moment) {
 
     // print('routeMoment ${moment.moments.toList().map((e) => e.id)}');
-    if(moment.moments.isNotEmpty && _moments.isNotEmpty) {
-      if(moment.moments.first.id < _moments.last.id) {
-        _moments.addAll(moment.moments);
-      } else{
-        _moments.insertAll(0, moment.moments);
+     if(moment.moments.isNotEmpty && _moments.isNotEmpty) {
+        if(moment.moments.first.id < _moments.last.id) {
+          _moments.addAll(moment.moments);
+        } else if(moment.moments.last.id > _moments.first.id) {
+          _moments.insertAll(0, moment.moments);
+        } else {
+          // 找到重复项的索引
+          for(int i = 0; i < moment.moments.length; i++) {
+            int index = _moments.indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
+            if (index != -1) {
+              // 替换重复项
+              _moments[index] = moment.moments[i];
+            }
+          }
+        }
+      }else if(moment.moments.isNotEmpty && _moments.isEmpty) {
+          _moments = moment.moments;
       }
-    }else if(moment.moments.isNotEmpty && _moments.isEmpty) {
-        _moments = moment.moments;
-    }
     
     // print('_routeMoment ${_moments.toList().map((e) => e.id)}');
     //  _moments = moment.moments;
@@ -403,6 +411,7 @@ class TopicMe extends Topic {
 
   /// 处理评论列表响应
   void routeComments(CommentMessage commentMessage) {
+    print('routeComments ${commentMessage.comments.toList().map((e) => e.id)}');
     if (commentMessage.comments.isEmpty) {
       return;
     }
@@ -448,6 +457,7 @@ class TopicMe extends Topic {
   /// [parentId] 父评论ID（可选，用于多级回复）
   /// [attachments] 附件列表（可选）
   Future<CtrlMessage> publishComment({
+    required String topic,
     required int momId,
     required String content,
     int? topId,
@@ -455,7 +465,7 @@ class TopicMe extends Topic {
     List<String>? attachments,
   }) async {
     final comment = SetComment(
-      topic: topic_names.TOPIC_ME,
+      topic: topic,
       momId: momId,
       content: content,
       topId: topId,
@@ -468,20 +478,21 @@ class TopicMe extends Topic {
   }
 
   // 获取朋友圈列表
-  Future<void> touchGetMoments({
+  Future<CtrlMessage> touchGetMoments({
     required String topic,
     String? user,
     int? since,
     int? before,
     int? limit,
   }) async {
-    await _tinodeService.touchGetMoments(
+    final response = await _tinodeService.touchGetMoments(
       topic: topic,
       user: user,
       since: since,
       before: before,
       limit: limit,
     );
+    return CtrlMessage.fromMessage(response);
   }
 
   /// 获取评论列表
@@ -489,19 +500,20 @@ class TopicMe extends Topic {
   /// [since] 从哪个ID开始查，可选
   /// [before] 从哪个ID之前查，可选
   /// [limit] 获取数量限制，可选
-  Future<void> getComments({
+  Future<CtrlMessage> getComments({
     required int momId,
     int? since,
     int? before,
     int? limit,
   }) async {
-    await _tinodeService.getComments(
+    final response = await _tinodeService.getComments(
       topic: topic_names.TOPIC_ME,
       momId: momId,
       since: since,
       before: before,
       limit: limit,
     );
+    return CtrlMessage.fromMessage(response);
   }
 
   /// 删除评论
@@ -524,7 +536,7 @@ class TopicMe extends Topic {
       onCommentsUpdated.add(_commentsMap[momId] ?? []);
     }
     
-    return response;
+    return CtrlMessage.fromMessage(response);
   }
 
   /// 点赞或取消点赞动态
@@ -540,7 +552,7 @@ class TopicMe extends Topic {
       action: action,
     );
     
-    return response;
+    return CtrlMessage.fromMessage(response);
   }
 
   /// 删除朋友圈动态
@@ -563,7 +575,7 @@ class TopicMe extends Topic {
       _commentsMap.remove(momId);
     }
     
-    return response;
+    return CtrlMessage.fromMessage(response);
   }
 
   /// Delete validation credential
