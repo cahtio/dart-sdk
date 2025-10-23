@@ -114,7 +114,7 @@ class PacketGenerator {
       case packet_types.Moment:
         packetData = MomentPacketData(topic: topicName ?? '', content: '');
         break;
-      case packet_types.GetMoment:
+      case packet_types.MomentRes:
         packetData = GetMomentsPacketData(topic: topicName ?? '');
         break;
       case packet_types.GetComments:
