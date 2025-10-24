@@ -390,7 +390,7 @@ class Tinode {
 
   /// Create message draft without sending it to the server
   Message createMessage(String topicName, dynamic data, bool echo,
-      {dynamic head = null}) {
+      {dynamic head}) {
     return _tinodeService.createMessage(topicName, data, echo, head: head);
   }
 
