@@ -147,10 +147,11 @@ class Moment {
   final String content;
   final int privacy;
   final bool isOwner;
-  final int? likeCount;
+  int? likeCount;
   final int? shareCount;
   final int? viewCount;
   final bool? isShared;
+  bool? isLiked;
   final int? commentCount;
   final int? shareFromId;
   final Moment? shareFromMoment;
@@ -169,6 +170,7 @@ class Moment {
     this.shareCount,
     this.viewCount,
     this.isShared,
+    this.isLiked,
     this.commentCount,
     this.shareFromId,
     this.shareFromMoment,
@@ -193,6 +195,7 @@ class Moment {
       shareCount: msg['shareCount'],
       viewCount: msg['viewCount'],
       isShared: msg['isShared'],
+      isLiked: msg['isLiked'],
       commentCount: msg['commentCount'],
       shareFromId: msg['shareFromId'],
       shareFromMoment: msg['shareFromMoment'] != null

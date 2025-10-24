@@ -33,12 +33,13 @@ class TopicMe extends Topic {
   PublishSubject<List<Credential>> onCredsUpdated =
       PublishSubject<List<Credential>>();
 
-  PublishSubject<List<Moment>> onMomentsUpdated = PublishSubject<List<Moment>>();
+  PublishSubject<List<Moment>> onMomentsUpdated =
+      PublishSubject<List<Moment>>();
   List<Moment> _moments = <Moment>[];
   // static const momentsKey = 'moments';
 
   /// This event will be triggered when comments are updated
-  PublishSubject<List<MomentComment>> onCommentsUpdated = 
+  PublishSubject<List<MomentComment>> onCommentsUpdated =
       PublishSubject<List<MomentComment>>();
   Map<int, List<MomentComment>> _commentsMap = {};
 
@@ -377,36 +378,35 @@ class TopicMe extends Topic {
   }
 
   void routeMoment(MomentMessage moment) {
-
     // print('routeMoment ${moment.moments.toList().map((e) => e.id)}');
-     if(moment.moments.isNotEmpty && _moments.isNotEmpty) {
-        if(moment.moments.first.id < _moments.last.id) {
-          _moments.addAll(moment.moments);
-        } else if(moment.moments.last.id > _moments.first.id) {
-          _moments.insertAll(0, moment.moments);
-        } else {
-          // 找到重复项的索引
-          for(int i = 0; i < moment.moments.length; i++) {
-            int index = _moments.indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
-            if (index != -1) {
-              // 替换重复项
-              _moments[index] = moment.moments[i];
-            }
+    if (moment.moments.isNotEmpty && _moments.isNotEmpty) {
+      if (moment.moments.first.id < _moments.last.id) {
+        _moments.addAll(moment.moments);
+      } else if (moment.moments.last.id > _moments.first.id) {
+        _moments.insertAll(0, moment.moments);
+      } else {
+        // 找到重复项的索引
+        for (int i = 0; i < moment.moments.length; i++) {
+          int index = _moments
+              .indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
+          if (index != -1) {
+            // 替换重复项
+            _moments[index] = moment.moments[i];
           }
         }
-      }else if(moment.moments.isNotEmpty && _moments.isEmpty) {
-          _moments = moment.moments;
       }
-    
+    } else if (moment.moments.isNotEmpty && _moments.isEmpty) {
+      _moments = moment.moments;
+    }
+
     // print('_routeMoment ${_moments.toList().map((e) => e.id)}');
     //  _moments = moment.moments;
     onMomentsUpdated.add(_moments);
-    
+
     // if(_authService.userId != null) {
     //   print('_tinodeService.userId! ${_authService.userId!} ${_moments.toList()}');
     //   _cacheManager.put(momentsKey, _authService.userId!, _moments.toList());
     // }
-    
   }
 
   /// 处理评论列表响应
@@ -418,13 +418,13 @@ class TopicMe extends Topic {
 
     // 获取第一个评论的 momentId，假设所有评论都属于同一个动态
     int momentId = commentMessage.comments.first.momentId;
-    
+
     // 将评论存储到 map 中
     if (_commentsMap.containsKey(momentId)) {
       // 如果已经有该动态的评论，合并列表
       var existingComments = _commentsMap[momentId]!;
       var newComments = commentMessage.comments;
-      
+
       // 简单合并，去重可以根据需求添加
       for (var comment in newComments) {
         if (!existingComments.any((c) => c.id == comment.id)) {
@@ -436,7 +436,7 @@ class TopicMe extends Topic {
       // 如果是新的动态评论，直接添加
       _commentsMap[momentId] = List.from(commentMessage.comments);
     }
-    
+
     // 触发更新事件
     onCommentsUpdated.add(_commentsMap[momentId]!);
   }
@@ -472,9 +472,9 @@ class TopicMe extends Topic {
       parentId: parentId,
       attachments: attachments,
     );
-    
+
     final response = await _tinodeService.publishComment(comment);
-    return CtrlMessage.fromMessage(response);
+    return response;
   }
 
   // 获取朋友圈列表
@@ -492,7 +492,7 @@ class TopicMe extends Topic {
       before: before,
       limit: limit,
     );
-    return CtrlMessage.fromMessage(response);
+    return response;
   }
 
   /// 获取评论列表
@@ -513,7 +513,7 @@ class TopicMe extends Topic {
       before: before,
       limit: limit,
     );
-    return CtrlMessage.fromMessage(response);
+    return response;
   }
 
   /// 删除评论
@@ -528,15 +528,15 @@ class TopicMe extends Topic {
       momId: momId,
       commentId: commentId,
     );
-    
+
     // 从本地缓存中删除该评论
     if (_commentsMap.containsKey(momId)) {
       _commentsMap[momId]?.removeWhere((comment) => comment.id == commentId);
       // 触发更新事件
       onCommentsUpdated.add(_commentsMap[momId] ?? []);
     }
-    
-    return CtrlMessage.fromMessage(response);
+
+    return response;
   }
 
   /// 点赞或取消点赞动态
@@ -551,8 +551,8 @@ class TopicMe extends Topic {
       momId: momId,
       action: action,
     );
-    
-    return CtrlMessage.fromMessage(response);
+
+    return response;
   }
 
   /// 删除朋友圈动态
@@ -564,18 +564,18 @@ class TopicMe extends Topic {
       topic: topic_names.TOPIC_ME,
       momId: momId,
     );
-    
+
     // 从本地缓存中删除该动态
     _moments.removeWhere((moment) => moment.id == momId);
     // 触发更新事件
     onMomentsUpdated.add(_moments);
-    
+
     // 同时删除该动态的所有评论
     if (_commentsMap.containsKey(momId)) {
       _commentsMap.remove(momId);
     }
-    
-    return CtrlMessage.fromMessage(response);
+
+    return response;
   }
 
   /// Delete validation credential
@@ -715,13 +715,12 @@ class TopicMe extends Topic {
 
   /// Get All Moments or Get Moments of a topicName, from cache
   List<Moment>? getMomentsOrByUserId(String? topicName) {
-
     // if(_moments.isEmpty && _authService.userId != null){
     //   _moments = _cacheManager.get(momentsKey, _authService.userId!) ?? [];
     //   print('getMoments ${_authService.userId} ${_moments.toList()}');
     // }
-    
-    if(topicName == null) {
+
+    if (topicName == null) {
       return _moments;
     }
     return _moments.where((moment) => moment.userId == topicName).toList();
