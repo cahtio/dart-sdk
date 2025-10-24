@@ -1,23 +1,12 @@
-class DeleteTransactionRange {
-  final int? hi;
-  final int? low;
 
-  DeleteTransactionRange({this.hi, this.low});
-
-  static DeleteTransactionRange fromMessage(Map<String, dynamic> msg) {
-    return DeleteTransactionRange(
-      low: msg['low'],
-      hi: msg['hi'],
-    );
-  }
-}
+import 'package:tinode/src/models/del-range.dart';
 
 class DeleteTransaction {
   /// Id of the latest applicable 'delete' transaction
   final int? clear;
 
   /// Ranges of Ids of deleted messages
-  final List<DeleteTransactionRange>? delseq;
+  final List<DelRange>? delseq;
 
   DeleteTransaction({this.clear, this.delseq});
 
@@ -25,7 +14,7 @@ class DeleteTransaction {
     return DeleteTransaction(
       clear: msg['clear'],
       delseq:
-          msg['delseq'] != null && msg['delseq'].length != null ? msg['delseq'].map((del) => DeleteTransactionRange.fromMessage(del)).toList() : [],
+          msg['delseq'] != null && msg['delseq'].length != null ? msg['delseq'].map((del) => DelRange.fromMessage(del)).toList() : [],
     );
   }
 }

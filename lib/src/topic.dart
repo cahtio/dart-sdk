@@ -1027,7 +1027,7 @@ class Topic {
   void processMetaCreds(List<Credential> cred, bool a) {}
 
   /// Delete cached messages and update cached transaction IDs
-  void processDelMessages(int clear, List<DeleteTransactionRange> delseq) {
+  void processDelMessages(int clear, List<DelRange> delseq) {
     _maxDel = max(clear, _maxDel);
 
     if (this.clear != null) {
@@ -1159,7 +1159,7 @@ class Topic {
       // Found a new gap.
       if (prev.hi != null && prev.hi != 0) {
         // Previous is also a gap, alter it.
-        prev.hi = data.hi! > 0 ? data.hi : data.seq;
+        prev.hi = data.hi != null ? (data.hi! > 0 ? data.hi : data.seq) : data.seq;
         return;
       }
 

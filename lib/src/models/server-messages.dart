@@ -1,3 +1,4 @@
+import 'package:tinode/src/models/del-range.dart';
 import 'package:tinode/src/models/topic-subscription.dart';
 import 'package:tinode/src/models/delete-transaction.dart';
 import 'package:tinode/src/models/topic-description.dart';
@@ -195,7 +196,7 @@ class PresMessage {
   final int? clear;
 
   /// Array of ranges, "what" is "del", ranges of Ids of deleted messages, optional
-  final List<DeleteTransactionRange>? delseq;
+  final List<DelRange>? delseq;
 
   /// A User Agent string identifying client
   final String? ua;
@@ -232,11 +233,9 @@ class PresMessage {
       what: msg['what'],
       seq: msg['seq'],
       clear: msg['clear'],
-      delseq: msg['delseq'] != null && msg['delseq'].length != null
-          ? msg['delseq']
-              .map((seq) => DeleteTransactionRange.fromMessage(seq))
-              .toList()
-          : [],
+      delseq: msg['delseq'] != null
+          ? (msg['delseq'] as List).map((seq) => DelRange.fromMessage(seq)).toList()
+          : null,
       ua: msg['ua'],
       act: msg['act'],
       tgt: msg['tgt'],
@@ -261,10 +260,13 @@ class InfoMessage {
   final int? seq;
 
   final String? event;
+
+  final List<DelRange>? delseq;
+  
   final dynamic payload;
 
   InfoMessage(
-      {this.topic, this.from, this.what, this.seq, this.event, this.payload});
+      {this.topic, this.from, this.what, this.seq, this.event, this.delseq, this.payload});
 
   static InfoMessage fromMessage(Map<String, dynamic> msg) {
     return InfoMessage(
@@ -273,6 +275,9 @@ class InfoMessage {
         what: msg['what'],
         seq: msg['seq'],
         event: msg['event'],
+        delseq: msg['delseq'] != null
+            ? (msg['delseq'] as List).map((seq) => DelRange.fromMessage(seq)).toList()
+            : null,
         payload: msg['payload']);
   }
 }
