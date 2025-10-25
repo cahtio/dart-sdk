@@ -249,6 +249,8 @@ class InfoMessage {
   /// topic affected, always present
   final String? topic;
 
+  final String? src;
+
   /// id of the user who published the message, always present
   final String? from;
 
@@ -266,11 +268,12 @@ class InfoMessage {
   final dynamic payload;
 
   InfoMessage(
-      {this.topic, this.from, this.what, this.seq, this.event, this.delseq, this.payload});
+      {this.topic, this.src, this.from, this.what, this.seq, this.event, this.delseq, this.payload});
 
   static InfoMessage fromMessage(Map<String, dynamic> msg) {
     return InfoMessage(
         topic: msg['topic'],
+        src: msg['src'],
         from: msg['from'],
         what: msg['what'],
         seq: msg['seq'],
