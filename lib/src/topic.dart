@@ -445,6 +445,7 @@ class Topic {
     // ignore: omit_local_variable_types
     List<DelRange> toSend = [];
     ranges.forEach((r) {
+      _databaseManager.message.deleteMessage(name!, r);
       if (r.low! < _configService.appSettings.localSeqId) {
         if (r.hi == null || r.hi! < _configService.appSettings.localSeqId) {
           toSend.add(r);
@@ -466,7 +467,12 @@ class Topic {
     }
 
     var response = await result;
-    var ctrl = CtrlMessage.fromMessage(response);
+    var ctrl;
+    if(response is CtrlMessage) {
+      ctrl = response;
+    } else {
+      ctrl = CtrlMessage.fromMessage(response);
+    }
 
     if (ctrl.params['del'] > _maxDel) {
       _maxDel = ctrl.params['del'];
@@ -714,13 +720,21 @@ class Topic {
     return idx >= 0 ? _messages.deleteAt(idx) : null;
   }
 
-  void flushMessageRange(int fromId, int untilId) {
+  Future<void> flushMessageRange(int fromId, int untilId) async {
     // start, end: find insertion points (nearest == true).
     var since = _messages.find(DataMessage(seq: fromId), true);
-    return since >= 0
+    var d = since >= 0
         ? _messages.deleteRange(
             since, _messages.find(DataMessage(seq: untilId), true))
         : [];
+    if(fromId >= _maxSeq || untilId >= _maxSeq) {// 如果删除的是最后一条消息
+        var msg =  await _databaseManager.message.lastMessage(name!);
+        var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
+        if(msg != null) {
+          me.setLastMessage(name ?? '', msg);
+        }
+    }
+    return d;
   }
 
   /// Get type of the topic: me, p2p, grp, fnd...
@@ -766,6 +780,7 @@ class Topic {
 
   /// Process data message
   void routeData(DataMessage data) async {
+    print("routeData ： ${name ?? ''} $data ${data.seq}");
     if (data.content != null) {
       if (touched == null) {
         touched = data.ts;

@@ -405,9 +405,11 @@ class TopicMe extends Topic {
     if (cont == null) return;
     if ((cont.lastMessage?.seq ?? 0) < (message.seq ?? 0)) {
       cont.updated = message.ts;
-      cont.lastMessage = message;
-      onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
+    } else { // 一般是删除最后一条消息 才会进这里
+      cont.updated = DateTime.now();
     }
+    cont.lastMessage = message;
+    onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
   }
 
   /// Update a cached contact with new read/received/message count
