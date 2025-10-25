@@ -479,7 +479,7 @@ class Topic {
     }
 
     ranges.forEach((r) {
-      if (r.hi != 0) {
+      if (r.hi != null && r.hi != 0) {
         flushMessageRange(r.low!, r.hi!);
       } else {
         flushMessage(r.low!);
@@ -717,24 +717,34 @@ class Topic {
 
   DataMessage? flushMessage(int seqId) {
     var idx = _messages.find(DataMessage(seq: seqId), false);
-    return idx >= 0 ? _messages.deleteAt(idx) : null;
+    var d = idx >= 0 ? _messages.deleteAt(idx) : null;
+    if(seqId >= _maxSeq ) {
+      // 如果删除的是最后一条消息
+      deleteAndRestLastMsg();
+    }
+    return d;
   }
 
-  Future<void> flushMessageRange(int fromId, int untilId) async {
+  void flushMessageRange(int fromId, int untilId) {
     // start, end: find insertion points (nearest == true).
     var since = _messages.find(DataMessage(seq: fromId), true);
     var d = since >= 0
         ? _messages.deleteRange(
             since, _messages.find(DataMessage(seq: untilId), true))
         : [];
-    if(fromId >= _maxSeq || untilId >= _maxSeq) {// 如果删除的是最后一条消息
-        var msg =  await _databaseManager.message.lastMessage(name!);
-        var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
-        if(msg != null) {
-          me.setLastMessage(name ?? '', msg);
-        }
+    if(fromId >= _maxSeq || untilId >= _maxSeq) {
+      // 如果删除的是最后一条消息
+      deleteAndRestLastMsg();
     }
     return d;
+  }
+
+  Future<void> deleteAndRestLastMsg() async {
+    var msg =  await _databaseManager.message.lastMessage(name!);
+    var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
+    if(msg != null) {
+      me.setLastMessage(name ?? '', msg);
+    }
   }
 
   /// Get type of the topic: me, p2p, grp, fnd...
