@@ -445,6 +445,7 @@ class Topic {
     // ignore: omit_local_variable_types
     List<DelRange> toSend = [];
     ranges.forEach((r) {
+      _databaseManager.message.deleteMessage(name!, r);
       if (r.low! < _configService.appSettings.localSeqId) {
         if (r.hi == null || r.hi! < _configService.appSettings.localSeqId) {
           toSend.add(r);
@@ -466,14 +467,19 @@ class Topic {
     }
 
     var response = await result;
-    var ctrl = CtrlMessage.fromMessage(response);
+    var ctrl;
+    if(response is CtrlMessage) {
+      ctrl = response;
+    } else {
+      ctrl = CtrlMessage.fromMessage(response);
+    }
 
     if (ctrl.params['del'] > _maxDel) {
       _maxDel = ctrl.params['del'];
     }
 
     ranges.forEach((r) {
-      if (r.hi != 0) {
+      if (r.hi != null && r.hi != 0) {
         flushMessageRange(r.low!, r.hi!);
       } else {
         flushMessage(r.low!);
@@ -711,16 +717,35 @@ class Topic {
 
   DataMessage? flushMessage(int seqId) {
     var idx = _messages.find(DataMessage(seq: seqId), false);
-    return idx >= 0 ? _messages.deleteAt(idx) : null;
+    var d = idx >= 0 ? _messages.deleteAt(idx) : null;
+    if(seqId >= _maxSeq ) {
+      // 如果删除的是最后一条消息
+      deleteAndRestLastMsg();
+    }
+    return d;
   }
 
   void flushMessageRange(int fromId, int untilId) {
     // start, end: find insertion points (nearest == true).
     var since = _messages.find(DataMessage(seq: fromId), true);
-    return since >= 0
+    var d = since >= 0
         ? _messages.deleteRange(
             since, _messages.find(DataMessage(seq: untilId), true))
         : [];
+    if(fromId >= _maxSeq || untilId >= _maxSeq) {
+      // 如果删除的是最后一条消息
+      deleteAndRestLastMsg();
+    }
+    return d;
+  }
+
+  Future<void> deleteAndRestLastMsg() async {
+    var msg =  await _databaseManager.message.lastMessage(name!);
+    var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
+    if(msg != null && msg.seq != null) {
+      _maxSeq = msg.seq!;
+      me.setLastMessage(name ?? '', msg);
+    }
   }
 
   /// Get type of the topic: me, p2p, grp, fnd...
@@ -766,6 +791,7 @@ class Topic {
 
   /// Process data message
   void routeData(DataMessage data) async {
+    print("routeData ： ${name ?? ''} $data ${data.seq}");
     if (data.content != null) {
       if (touched == null) {
         touched = data.ts;
@@ -1027,7 +1053,7 @@ class Topic {
   void processMetaCreds(List<Credential> cred, bool a) {}
 
   /// Delete cached messages and update cached transaction IDs
-  void processDelMessages(int clear, List<DeleteTransactionRange> delseq) {
+  void processDelMessages(int clear, List<DelRange> delseq) {
     _maxDel = max(clear, _maxDel);
 
     if (this.clear != null) {
@@ -1159,7 +1185,7 @@ class Topic {
       // Found a new gap.
       if (prev.hi != null && prev.hi != 0) {
         // Previous is also a gap, alter it.
-        prev.hi = data.hi! > 0 ? data.hi : data.seq;
+        prev.hi = data.hi != null ? (data.hi! > 0 ? data.hi : data.seq) : data.seq;
         return;
       }
 

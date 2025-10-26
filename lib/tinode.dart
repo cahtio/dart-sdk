@@ -419,7 +419,7 @@ class Tinode {
   }
 
   /// Delete some or all messages in a topic
-  Future deleteMessages(String topicName, List<DelRange> ranges, bool hard) {
+  Future deleteMessages(String topicName, List<DelRange> ranges, bool hard) async {
     return _tinodeService.deleteMessages(topicName, ranges, hard);
   }
 
