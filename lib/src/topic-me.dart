@@ -545,9 +545,10 @@ class TopicMe extends Topic {
   Future<CtrlMessage> likeMoment({
     required int momId,
     required int action,
+    required String topic,
   }) async {
     final response = await _tinodeService.likeMoment(
-      topic: topic_names.TOPIC_ME,
+      topic: topic,
       momId: momId,
       action: action,
     );
