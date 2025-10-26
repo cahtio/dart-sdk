@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:get_it/get_it.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:tinode/src/models/del-range.dart';
 
 import 'package:tinode/src/models/server-messages.dart';
 import 'package:tinode/src/services/logger.dart';
@@ -86,6 +87,47 @@ class MessageStore with StoreMixin {
     } else {
       await _insert(message);
     }
+  }
+
+  Future<int?> deleteMessage(String topicName, DelRange? range) async {
+    if (topicName.isEmpty) {
+      _logError('Delete error, message topic is empty!');
+      return null;
+    }
+
+    if (range == null) {
+      _logError('Delete error, range is null!');
+      return null;
+    }
+
+    // 处理range.low和range.hi为空的情况
+    if (range.low == null && range.hi == null) {
+      _logError('Delete error, both range.low and range.hi are null!');
+      return null;
+    }
+
+    // 构建WHERE条件
+    String whereClause;
+    List<dynamic> whereArgs;
+    if (range.all == true) {
+      whereClause = '$kColumnTopic = ?';
+      whereArgs = [topicName];
+    } else if (range.low != null && range.hi != null) {
+      whereClause = '$kColumnTopic = ? AND $kColumnSeq BETWEEN ? AND ?';
+      whereArgs = [topicName, range.low, range.hi];
+    } else if (range.low != null) {
+      whereClause = '$kColumnTopic = ? AND $kColumnSeq >= ?';
+      whereArgs = [topicName, range.low];
+    } else {
+      whereClause = '$kColumnTopic = ? AND $kColumnSeq <= ?';
+      whereArgs = [topicName, range.hi];
+    }
+
+    return db.delete(
+      kTableName,
+      where: whereClause,
+      whereArgs: whereArgs,
+    );
   }
 
   Future<int> _count(String topic, String from, int seq) async {

@@ -395,7 +395,7 @@ class Tinode {
 
   /// Create message draft without sending it to the server
   Message createMessage(String topicName, dynamic data, bool echo,
-      {dynamic head = null}) {
+      {dynamic head}) {
     return _tinodeService.createMessage(topicName, data, echo, head: head);
   }
 
@@ -419,7 +419,7 @@ class Tinode {
   }
 
   /// Delete some or all messages in a topic
-  Future deleteMessages(String topicName, List<DelRange> ranges, bool hard) {
+  Future deleteMessages(String topicName, List<DelRange> ranges, bool hard) async {
     return _tinodeService.deleteMessages(topicName, ranges, hard);
   }
 
