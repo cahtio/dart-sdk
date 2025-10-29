@@ -111,9 +111,9 @@ class OwnerUser {
 class MomentComment {
   final int id;
   final int momentId;
-  final String userId;
-  final DateTime createdAt;
-  final String content;
+  String userId;
+  DateTime createdAt;
+  String content;
   final OwnerUser? user;
 
   MomentComment({
@@ -152,7 +152,7 @@ class Moment {
   final int? viewCount;
   final bool? isShared;
   bool? isLiked;
-  final int? commentCount;
+  int? commentCount;
   final int? shareFromId;
   final Moment? shareFromMoment;
   final OwnerUser? ownerUser;
