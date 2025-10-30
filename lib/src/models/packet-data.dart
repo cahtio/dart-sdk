@@ -247,26 +247,29 @@ class MomentPacketData extends PacketData {
   String content;
   int? privacy;
   int? momId;
-  List<String>? attachments;
+  List<dynamic>? data;
+  List<dynamic>? attachments;
 
   MomentPacketData(
       {required this.topic,
       required this.content,
       this.privacy,
       this.momId,
+      this.data,
       this.attachments});
 
   @override
   Map<String, dynamic> toMap() {
-    final data = <String, dynamic>{'content': content};
+    final dataMap = <String, dynamic>{'content': content};
 
-    if (privacy != null) data['privacy'] = privacy;
-    if (momId != null) data['momId'] = momId;
-    if (attachments?.isNotEmpty ?? true) data['attachments'] = attachments;
+    if (privacy != null) dataMap['privacy'] = privacy;
+    if (momId != null) dataMap['momId'] = momId;
+    if (data !=null) dataMap['data'] = data;
+    if (attachments?.isNotEmpty ?? true) dataMap['attachments'] = attachments;
 
     return {
       'topic': topic,
-      'set': {'data': data}
+      'set': {'data': dataMap}
     };
   }
 }

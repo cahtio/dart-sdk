@@ -9,7 +9,8 @@ class SetMoment {
   String content;
   int? momId;
   bool? privacy;
-  List<String>? attachments;
+  List<Map<String, dynamic>>? data;
+  List<String>? attachments; // 附件用户后端持久化
 
   late PacketGenerator _packetGenerator;
 
@@ -18,17 +19,18 @@ class SetMoment {
       required this.content,
       this.momId,
       this.privacy,
-      this.attachments}) {
+      this.data}) {
     _packetGenerator = GetIt.I.get<PacketGenerator>();
   }
 
   Packet asMomentPacket() {
     var packet = _packetGenerator.generate(packet_types.GetMoment, topic);
-    var data = packet.data as MomentPacketData;
-    data.content = content;
-    if (privacy != null) data.privacy = privacy! ? 1 : 0;
-    data.momId = momId;
-    data.attachments = attachments;
+    var packetData = packet.data as MomentPacketData;
+    packetData.content = content;
+    if (privacy != null) packetData.privacy = privacy! ? 1 : 0;
+    packetData.momId = momId;
+    packetData.attachments = attachments;
+    packetData.data = data;
     return packet;
   }
 }
@@ -141,8 +143,8 @@ class MomentComment {
 
 class Moment {
   final int id;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String userId;
   final String content;
   final int privacy;
@@ -156,7 +158,7 @@ class Moment {
   final int? shareFromId;
   final Moment? shareFromMoment;
   final OwnerUser? ownerUser;
-  final List<String>? attachments;
+  List<Map<String, dynamic>>? data;
 
   Moment({
     required this.id,
@@ -175,7 +177,7 @@ class Moment {
     this.shareFromId,
     this.shareFromMoment,
     this.ownerUser,
-    this.attachments,
+    this.data,
   });
 
   factory Moment.fromMessage(Map<String, dynamic> msg) {
@@ -204,7 +206,9 @@ class Moment {
       ownerUser: msg['ownerUser'] != null
           ? OwnerUser.fromMessage(msg['ownerUser'])
           : null,
-      attachments: (msg['attachments'] as List<dynamic>?)?.cast<String>(),
+      data: msg['data'] != null
+          ? (msg['data'] as List<dynamic>).cast<Map<String, dynamic>>()
+          : null,
     );
   }
 }
