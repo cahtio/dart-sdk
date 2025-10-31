@@ -381,17 +381,28 @@ class TopicMe extends Topic {
     // print('routeMoment ${moment.moments.toList().map((e) => e.id)}');
     if (moment.moments.isNotEmpty && _moments.isNotEmpty) {
       if (moment.moments.first.id < _moments.last.id) {
+        // print('routeMoment addAll ${moment.moments.first.id} < ${_moments.last.id}');
         _moments.addAll(moment.moments);
       } else if (moment.moments.last.id > _moments.first.id) {
+        // print('routeMoment insertAll ${moment.moments.last.id} > ${_moments.first.id}');
         _moments.insertAll(0, moment.moments);
       } else {
-        // 找到重复项的索引
+        // 找到重复项 覆盖，不重复项插入
         for (int i = 0; i < moment.moments.length; i++) {
           int index = _moments
               .indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
+          var tempM = moment.moments[i];
           if (index != -1) {
             // 替换重复项
-            _moments[index] = moment.moments[i];
+            _moments[index] = tempM;
+          } else {
+            if (tempM.id < _moments.last.id) {
+              // print('routeMoment add one ${tempM.id} < ${_moments.last.id}');
+              _moments.add(tempM);
+            } else if (tempM.id > _moments.first.id) {
+              // print('routeMoment insert one ${tempM.id} > ${_moments.first.id}');
+              _moments.insert(0, tempM);
+            }
           }
         }
       }
