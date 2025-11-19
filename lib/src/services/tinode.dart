@@ -183,6 +183,13 @@ class TinodeService {
     topicMe.routeMoment(moment);
   }
 
+  void handleNotificationMessage(NotificationMessage? notification) {
+    if (notification == null) return;
+
+    var topicMe = getTopic(topic_names.TOPIC_ME) as TopicMe;
+    topicMe.routeNotification(notification);
+  }
+
   void handleCommentMessage(CommentMessage? commentMessage) {
     if (commentMessage == null) return;
 
@@ -400,8 +407,28 @@ class TinodeService {
     return _send(comment.asCommentPacket());
   }
 
+  Future touchGetNotifications({
+    required String topic,
+    int? since,
+    int? before,
+    int? limit,
+  }) async {
+    final data = GetNotificationsPacketData(
+      topic: topic,
+      since: since,
+      before: before,
+      limit: limit,
+    );
+
+    final packet =
+        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+
+    return _send(packet);
+  }
+
   Future touchGetMoments({
     required String topic,
+    required String? channelTopic,
     String? user,
     int? since,
     int? before,
@@ -409,13 +436,15 @@ class TinodeService {
   }) async {
     final data = GetMomentsPacketData(
       topic: topic,
+      channelTopic: channelTopic,
       user: user,
       since: since,
       before: before,
       limit: limit,
     );
 
-    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+    final packet =
+        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
     return _send(packet);
   }
@@ -436,7 +465,8 @@ class TinodeService {
       limit: limit,
     );
 
-    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+    final packet =
+        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
     return _send(packet);
   }
@@ -453,7 +483,8 @@ class TinodeService {
       commentId: commentId,
     );
 
-    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+    final packet =
+        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
     return _send(packet);
   }
@@ -473,7 +504,8 @@ class TinodeService {
       action: action,
     );
 
-    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+    final packet =
+        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
     return _send(packet);
   }
@@ -490,10 +522,10 @@ class TinodeService {
       momId: momId,
     );
 
-    final packet = Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+    final packet =
+        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
 
     return _send(packet);
-
   }
 
   /// Request topic metadata

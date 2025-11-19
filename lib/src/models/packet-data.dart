@@ -274,8 +274,69 @@ class MomentPacketData extends PacketData {
   }
 }
 
+class NotificationsPacketData extends PacketData {
+  String topic;
+  String content;
+  int? privacy;
+  int? momId;
+  List<dynamic>? data;
+  List<dynamic>? attachments;
+
+  NotificationsPacketData(
+      {required this.topic,
+      required this.content,
+      this.privacy,
+      this.momId,
+      this.data,
+      this.attachments});
+
+  @override
+  Map<String, dynamic> toMap() {
+    final dataMap = <String, dynamic>{'content': content};
+
+    if (privacy != null) dataMap['privacy'] = privacy;
+    if (momId != null) dataMap['momId'] = momId;
+    if (data !=null) dataMap['data'] = data;
+    if (attachments?.isNotEmpty ?? true) dataMap['attachments'] = attachments;
+
+    return {
+      'topic': topic,
+      'set': {'data': dataMap}
+    };
+  }
+}
+
+class GetNotificationsPacketData extends PacketData {
+  String topic;
+  int? since;
+  int? before;
+  int? limit;
+
+  GetNotificationsPacketData({
+    required this.topic,
+    this.since,
+    this.before,
+    this.limit,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    final notifications = <String, dynamic>{};
+
+    if (since != null) notifications['since'] = since;
+    if (before != null) notifications['before'] = before;
+    if (limit != null) notifications['limit'] = limit;
+
+    return {
+      'topic': topic,
+      'get': {'notifications': notifications}
+    };
+  }
+}
+
 class GetMomentsPacketData extends PacketData {
   String topic;
+  String? channelTopic;
   String? user;
   int? since;
   int? before;
@@ -283,6 +344,7 @@ class GetMomentsPacketData extends PacketData {
 
   GetMomentsPacketData({
     required this.topic,
+    this.channelTopic,
     this.user,
     this.since,
     this.before,
@@ -297,6 +359,7 @@ class GetMomentsPacketData extends PacketData {
     if (since != null) data['since'] = since;
     if (before != null) data['before'] = before;
     if (limit != null) data['limit'] = limit;
+    if (channelTopic != null) data['topic'] = channelTopic;
 
     return {
       'topic': topic,

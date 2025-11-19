@@ -212,3 +212,63 @@ class Moment {
     );
   }
 }
+
+class MomentNotification {
+  final int id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String userId;
+  final String type;
+  final String title;
+  final String content;
+  final Moment? data; // 使用现有的 Moment 类
+  final String fromUserId;
+  final PublicData fromUserPublic;
+  final String sourceId;
+  final String targetId;
+  final String relatedId;
+  final String relatedType;
+  final int status;
+
+  MomentNotification({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.userId,
+    required this.type,
+    required this.title,
+    required this.content,
+    this.data,
+    required this.fromUserId,
+    required this.fromUserPublic,
+    required this.sourceId,
+    required this.targetId,
+    required this.relatedId,
+    required this.relatedType,
+    required this.status,
+  });
+
+  factory MomentNotification.fromMessage(Map<String, dynamic> msg) {
+    return MomentNotification(
+      id: msg['id'],
+      createdAt: msg['createdAt'] != null
+          ? DateTime.parse(msg['createdAt'])
+          : DateTime.now(),
+      updatedAt: msg['updatedAt'] != null
+          ? DateTime.parse(msg['updatedAt'])
+          : DateTime.now(),
+      userId: msg['userId'] ?? '',
+      type: msg['type'] ?? '',
+      title: msg['title'] ?? '',
+      content: msg['content'] ?? '',
+      data: msg['data'] != null ? Moment.fromMessage(msg['data']) : null,
+      fromUserId: msg['fromUserId'] ?? '',
+      fromUserPublic: PublicData.fromMessage(msg['fromUserPublic'] ?? {}),
+      sourceId: msg['sourceId'] ?? '',
+      targetId: msg['targetId'] ?? '',
+      relatedId: msg['relatedId'] ?? '',
+      relatedType: msg['relatedType'] ?? '',
+      status: msg['status'] ?? 0,
+    );
+  }
+}

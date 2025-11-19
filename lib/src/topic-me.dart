@@ -38,6 +38,11 @@ class TopicMe extends Topic {
   List<Moment> _moments = <Moment>[];
   // static const momentsKey = 'moments';
 
+  PublishSubject<List<MomentNotification>> onNotificationUpdated =
+      PublishSubject<List<MomentNotification>>();
+  List<MomentNotification> _notifications = <MomentNotification>[];
+  // static const momentsKey = 'notification';
+
   /// This event will be triggered when comments are updated
   PublishSubject<List<MomentComment>> onCommentsUpdated =
       PublishSubject<List<MomentComment>>();
@@ -420,6 +425,32 @@ class TopicMe extends Topic {
     // }
   }
 
+// 处理通知列表响应
+  void routeNotification(NotificationMessage notification) {
+    if (notification.notifications.isNotEmpty) {
+      if (_notifications.isNotEmpty) {
+        // 使用Set来跟踪已存在的通知ID，实现高效去重
+        Set<int> existingIds = _notifications.map((n) => n.id).toSet();
+
+        // 遍历新通知，只添加不存在的通知
+        for (var newNotification in notification.notifications) {
+          if (!existingIds.contains(newNotification.id)) {
+            _notifications.add(newNotification);
+          }
+        }
+
+        // 根据需要按时间排序（最新的在前）
+        _notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      } else {
+        // 如果现有通知列表为空，直接赋值并排序
+        _notifications = List.from(notification.notifications);
+        _notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      }
+      // 通知监听器
+      onNotificationUpdated.add(List.from(_notifications));
+    }
+  }
+
   /// 处理评论列表响应
   void routeComments(CommentMessage commentMessage) {
     print('routeComments ${commentMessage.comments.toList().map((e) => e.id)}');
@@ -488,9 +519,25 @@ class TopicMe extends Topic {
     return response;
   }
 
+  Future<CtrlMessage> touchGetNotifications({
+    required String topic,
+    int? since,
+    int? before,
+    int? limit,
+  }) async {
+    final response = await _tinodeService.touchGetNotifications(
+      topic: topic,
+      since: since,
+      before: before,
+      limit: limit,
+    );
+    return response;
+  }
+
   // 获取朋友圈列表
   Future<CtrlMessage> touchGetMoments({
     required String topic,
+    required String? channelTopic,
     String? user,
     int? since,
     int? before,
@@ -498,6 +545,7 @@ class TopicMe extends Topic {
   }) async {
     final response = await _tinodeService.touchGetMoments(
       topic: topic,
+      channelTopic: channelTopic,
       user: user,
       since: since,
       before: before,
@@ -624,7 +672,8 @@ class TopicMe extends Topic {
     if (cont == null) return;
     if ((cont.lastMessage?.seq ?? 0) < (message.seq ?? 0)) {
       cont.updated = message.ts;
-    } else { // 一般是删除最后一条消息 才会进这里
+    } else {
+      // 一般是删除最后一条消息 才会进这里
       cont.updated = DateTime.now();
     }
     cont.lastMessage = message;

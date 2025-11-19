@@ -14,6 +14,7 @@ const String Moment_Res = 'moment_res';
 const String ResMoment = 'moments';
 const String ResComments = 'moment_comments';
 const String Comment = 'comment';
+const String ResNotification = 'notifications';
 const String DeleteComment = 'delete_comment';
 const String LikeMoment = 'like_moment';
 const String DeleteMoment = 'delete_moment';

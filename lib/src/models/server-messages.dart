@@ -16,9 +16,10 @@ class ServerMessage {
   final InfoMessage? info;
   final MomentMessage? moment;
   final CommentMessage? comments;
+  final NotificationMessage? notification;
 
   ServerMessage(
-      {this.ctrl, this.meta, this.data, this.pres, this.info, this.moment, this.comments});
+      {this.ctrl, this.meta, this.data, this.pres, this.info, this.moment, this.comments, this.notification});
 
   static ServerMessage fromMessage(Map<String, dynamic> msg) {
     return ServerMessage(
@@ -32,6 +33,9 @@ class ServerMessage {
           : null,
       comments: msg['moment_res'] != null && msg['moment_res'][packet_types.ResComments] != null
           ? CommentMessage.fromMessage(msg['moment_res'])
+          : null,
+      notification: msg['moment_res'] != null && msg['moment_res'][packet_types.ResNotification] != null
+          ? NotificationMessage.fromMessage(msg['moment_res'])
           : null,
     );
   }
@@ -338,6 +342,28 @@ class CommentMessage {
       id: msg['id']?.toString() ?? '',
       topic: msg['topic'] ?? '',
       comments: comments,
+    );
+  }
+}
+
+class NotificationMessage {
+  final String id;
+  final String topic;
+  final List<MomentNotification> notifications;
+
+  NotificationMessage({required this.id, required this.topic, required this.notifications});
+
+  factory NotificationMessage.fromMessage(Map<String, dynamic> msg) {
+    final notificationsList = msg['notifications'] as List<dynamic>? ?? [];
+    final notifications = notificationsList
+        .map((notificationData) =>
+            MomentNotification.fromMessage(notificationData as Map<String, dynamic>))
+        .toList();
+
+    return NotificationMessage(
+      id: msg['id']?.toString() ?? '',
+      topic: msg['topic'] ?? '',
+      notifications: notifications,
     );
   }
 }
