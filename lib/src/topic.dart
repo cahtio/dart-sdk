@@ -743,8 +743,8 @@ class Topic {
     var msg =  await _databaseManager.message.lastMessage(name!);
     var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
     if(msg != null && msg.seq != null) {
-      _maxSeq = msg.seq!;
-      me.setLastMessage(name ?? '', msg);
+      _maxSeq = max(msg.seq!, _maxSeq);
+      me.setLastMessage(name ?? '', msg, del: true);
     }
   }
 

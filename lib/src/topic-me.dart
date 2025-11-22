@@ -666,18 +666,21 @@ class TopicMe extends Topic {
     return _contacts.values.toList();
   }
 
-  void setLastMessage(String contactName, DataMessage message) {
+  void setLastMessage(String contactName, DataMessage message, {bool del = false}) {
     final cont = _contacts[contactName];
-
+    print('setLastMessage  ${message.seq} ${message.content}');
     if (cont == null) return;
-    if ((cont.lastMessage?.seq ?? 0) < (message.seq ?? 0)) {
+    if ((cont.lastMessage?.seq ?? 0) <= (message.seq ?? 0)) {
       cont.updated = message.ts;
-    } else {
-      // 一般是删除最后一条消息 才会进这里
+      cont.lastMessage = message;
+      onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
+    } else if(del){
+      // 删除最后一条消息 才会进这里
       cont.updated = DateTime.now();
+      cont.lastMessage = message;
+      onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
     }
-    cont.lastMessage = message;
-    onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
+     
   }
 
   /// Update a cached contact with new read/received/message count

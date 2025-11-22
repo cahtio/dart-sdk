@@ -127,6 +127,10 @@ class TopicSubscription {
       seen: msg['seen'] != null ? Seen.fromMessages(msg['seen']) : null,
       noForwarding: msg['noForwarding'] ?? false,
       mode: msg['mode'],
+      unread: msg['unread'],
+      lastMessage: msg['lastMessage'] != null
+          ? DataMessage.fromMessage(msg['lastMessage'])
+          : null,
     );
   }
 
@@ -149,6 +153,7 @@ class TopicSubscription {
         seen: seen,
         noForwarding: noForwarding,
         mode: mode,
+        unread: unread,
         lastMessage: lastMessage);
   }
 
@@ -171,8 +176,25 @@ class TopicSubscription {
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     if (user != null) json['user'] = user;
-    if (acs != null) json['acs'] = acs;
+    if (acs != null) json['acs'] = acs!.toJson();
     if (mode != null) json['mode'] = mode;
+    if (updated != null) json['updated'] = updated!.toIso8601String();
+    if (touched != null) json['touched'] = touched!.toIso8601String();
+    if (deleted != null) json['deleted'] = deleted!.toIso8601String();
+    if (created != null) json['created'] = created!.toIso8601String();
+    if (read != null) json['read'] = read;
+    if (recv != null) json['recv'] = recv;
+    if (clear != null) json['clear'] = clear;
+    if (public != null) json['public'] = public;
+    if (private != null) json['private'] = private;
+    if (online != null) json['online'] = online;
+    if (topic != null) json['topic'] = topic;
+    if (seq != null) json['seq'] = seq;
+    // if (seen != null) json['seen'] = seen!.toJson();
+    if (noForwarding != null) json['noForwarding'] = noForwarding;
+    if (unread != null) json['unread'] = unread;
+    if (lastMessage != null) json['lastMessage'] = lastMessage!.toJson();
+
     return json;
   }
 }
