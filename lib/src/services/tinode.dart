@@ -430,6 +430,7 @@ class TinodeService {
     required String topic,
     required String? channelTopic,
     String? user,
+    String? id,
     int? since,
     int? before,
     int? limit,
@@ -443,8 +444,8 @@ class TinodeService {
       limit: limit,
     );
 
-    final packet =
-        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+    String idStr = id?? Tools.getNextUniqueId();
+    final packet = Packet(packet_types.GetMoment, data, idStr);
 
     return _send(packet);
   }

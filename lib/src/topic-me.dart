@@ -36,6 +36,9 @@ class TopicMe extends Topic {
   PublishSubject<List<Moment>> onMomentsUpdated =
       PublishSubject<List<Moment>>();
   List<Moment> _moments = <Moment>[];
+  PublishSubject<List<Moment>> onMomentsSelfUpdated =
+      PublishSubject<List<Moment>>();
+  List<Moment> _personalMoments = <Moment>[];
   // static const momentsKey = 'moments';
 
   PublishSubject<List<MomentNotification>> onNotificationUpdated =
@@ -383,46 +386,91 @@ class TopicMe extends Topic {
   }
 
   void routeMoment(MomentMessage moment) {
-    // print('routeMoment ${moment.moments.toList().map((e) => e.id)}');
-    if (moment.moments.isNotEmpty && _moments.isNotEmpty) {
-      if (moment.moments.first.id < _moments.last.id) {
-        // print('routeMoment addAll ${moment.moments.first.id} < ${_moments.last.id}');
-        _moments.addAll(moment.moments);
-      } else if (moment.moments.last.id > _moments.first.id) {
-        // print('routeMoment insertAll ${moment.moments.last.id} > ${_moments.first.id}');
-        _moments.insertAll(0, moment.moments);
-      } else {
-        // 找到重复项 覆盖，不重复项插入
-        for (int i = 0; i < moment.moments.length; i++) {
-          int index = _moments
-              .indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
-          var tempM = moment.moments[i];
-          if (index != -1) {
-            // 替换重复项
-            _moments[index] = tempM;
+    // 判断是否为个人朋友圈列表（id为-1）
+    bool isPersonalFeed =
+        moment.moments.isNotEmpty && moment.moments.first.id == -1;
+
+    if (isPersonalFeed) {
+      // 处理个人朋友圈列表
+    if (_personalMoments.isNotEmpty) {
+      // 首先检查是否有重复项，有则替换，无则添加
+      for (int i = 0; i < moment.moments.length; i++) {
+        int index = _personalMoments
+            .indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
+        var tempM = moment.moments[i];
+        if (index != -1) {
+          // 替换重复项
+          _personalMoments[index] = tempM;
+        } else {
+          // 对于新的朋友圈，根据时间戳决定插入位置
+          if (_personalMoments.isEmpty || 
+              tempM.createdAt!.isBefore(_personalMoments.last.createdAt!)) {
+            // 向后翻页，追加到列表末尾
+            _personalMoments.add(tempM);
+          } else if (tempM.createdAt!.isAfter(_personalMoments.first.createdAt!)) {
+            // 向前翻页，插入到列表开头
+            _personalMoments.insert(0, tempM);
           } else {
-            if (tempM.id < _moments.last.id) {
-              // print('routeMoment add one ${tempM.id} < ${_moments.last.id}');
-              _moments.add(tempM);
-            } else if (tempM.id > _moments.first.id) {
-              // print('routeMoment insert one ${tempM.id} > ${_moments.first.id}');
-              _moments.insert(0, tempM);
+            // 如果不在两端，需要找到合适的插入位置以保持时间顺序
+            int insertIndex = 0;
+            while (insertIndex < _personalMoments.length && 
+                   tempM.createdAt!.isBefore(_personalMoments[insertIndex].createdAt!)) {
+              insertIndex++;
             }
+            _personalMoments.insert(insertIndex, tempM);
           }
         }
       }
-    } else if (moment.moments.isNotEmpty && _moments.isEmpty) {
-      _moments = moment.moments;
+    } else {
+      // 初始加载时直接赋值
+      _personalMoments = moment.moments;
     }
+    
+    // 通知更新
+    onMomentsUpdated.add(List.from(_personalMoments));
+  }else {
+      // 原有逻辑保持不变，处理公共朋友圈
+      if (moment.moments.isNotEmpty && _moments.isNotEmpty) {
+        if (moment.moments.first.id < _moments.last.id) {
+          _moments.addAll(moment.moments);
+        } else if (moment.moments.last.id > _moments.first.id) {
+          _moments.insertAll(0, moment.moments);
+        } else {
+          // 找到重复项 覆盖，不重复项插入
+          for (int i = 0; i < moment.moments.length; i++) {
+            int index = _moments.indexWhere(
+                (momentObj) => momentObj.id == moment.moments[i].id);
+            var tempM = moment.moments[i];
+            if (index != -1) {
+              // 替换重复项
+              _moments[index] = tempM;
+            } else {
+              if (tempM.id < _moments.last.id) {
+                _moments.add(tempM);
+              } else if (tempM.id > _moments.first.id) {
+                _moments.insert(0, tempM);
+              }
+            }
+          }
+        }
+      } else if (moment.moments.isNotEmpty && _moments.isEmpty) {
+        _moments = moment.moments;
+      }
 
-    // print('_routeMoment ${_moments.toList().map((e) => e.id)}');
-    //  _moments = moment.moments;
-    onMomentsUpdated.add(_moments);
+      onMomentsUpdated.add(_moments);
+    }
 
     // if(_authService.userId != null) {
     //   print('_tinodeService.userId! ${_authService.userId!} ${_moments.toList()}');
     //   _cacheManager.put(momentsKey, _authService.userId!, _moments.toList());
     // }
+  }
+
+// 添加清理个人朋友圈列表
+  void clearPersonalMoments() {
+    _personalMoments.clear();
+    // 通知监听器列表已清空
+    // onMomentsUpdated.add([]);
   }
 
 // 处理通知列表响应
@@ -539,11 +587,13 @@ class TopicMe extends Topic {
     required String topic,
     required String? channelTopic,
     String? user,
+    String? id,
     int? since,
     int? before,
     int? limit,
   }) async {
     final response = await _tinodeService.touchGetMoments(
+      id: id,
       topic: topic,
       channelTopic: channelTopic,
       user: user,
@@ -626,7 +676,7 @@ class TopicMe extends Topic {
     );
 
     // 从本地缓存中删除该动态
-    _moments.removeWhere((moment) => moment.id == momId);
+    _personalMoments.removeWhere((moment) => moment.id == momId);
     // 触发更新事件
     onMomentsUpdated.add(_moments);
 
