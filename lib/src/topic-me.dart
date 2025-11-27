@@ -718,7 +718,7 @@ class TopicMe extends Topic {
 
   void setLastMessage(String contactName, DataMessage message, {bool del = false}) {
     final cont = _contacts[contactName];
-    print('setLastMessage  ${message.seq} ${message.content}');
+    // print('setLastMessage  ${message.seq} ${message.content}');
     if (cont == null) return;
     if ((cont.lastMessage?.seq ?? 0) <= (message.seq ?? 0)) {
       cont.updated = message.ts;
