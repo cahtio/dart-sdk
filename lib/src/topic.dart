@@ -652,9 +652,9 @@ class Topic {
     return _messages.getLast();
   }
 
-  Future<List<DataMessage>?> getStoredMessages() async {
+  Future<List<DataMessage>?> getStoredMessages({int limit = 20}) async {
     if (name == null) return null;
-    return _databaseManager.message.query(name!);
+    return _databaseManager.message.query(name!, limit:limit);
   }
 
   Future<DataMessage?> getLastStoredMessage() async {
