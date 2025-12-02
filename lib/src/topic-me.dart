@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tinode/src/models/moment.dart';
+import 'package:tinode/src/models/officialAccount-params.dart';
 import 'dart:math';
 
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
@@ -392,43 +393,45 @@ class TopicMe extends Topic {
 
     if (isPersonalFeed) {
       // 处理个人朋友圈列表
-    if (_personalMoments.isNotEmpty) {
-      // 首先检查是否有重复项，有则替换，无则添加
-      for (int i = 0; i < moment.moments.length; i++) {
-        int index = _personalMoments
-            .indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
-        var tempM = moment.moments[i];
-        if (index != -1) {
-          // 替换重复项
-          _personalMoments[index] = tempM;
-        } else {
-          // 对于新的朋友圈，根据时间戳决定插入位置
-          if (_personalMoments.isEmpty || 
-              tempM.createdAt!.isBefore(_personalMoments.last.createdAt!)) {
-            // 向后翻页，追加到列表末尾
-            _personalMoments.add(tempM);
-          } else if (tempM.createdAt!.isAfter(_personalMoments.first.createdAt!)) {
-            // 向前翻页，插入到列表开头
-            _personalMoments.insert(0, tempM);
+      if (_personalMoments.isNotEmpty) {
+        // 首先检查是否有重复项，有则替换，无则添加
+        for (int i = 0; i < moment.moments.length; i++) {
+          int index = _personalMoments
+              .indexWhere((momentObj) => momentObj.id == moment.moments[i].id);
+          var tempM = moment.moments[i];
+          if (index != -1) {
+            // 替换重复项
+            _personalMoments[index] = tempM;
           } else {
-            // 如果不在两端，需要找到合适的插入位置以保持时间顺序
-            int insertIndex = 0;
-            while (insertIndex < _personalMoments.length && 
-                   tempM.createdAt!.isBefore(_personalMoments[insertIndex].createdAt!)) {
-              insertIndex++;
+            // 对于新的朋友圈，根据时间戳决定插入位置
+            if (_personalMoments.isEmpty ||
+                tempM.createdAt!.isBefore(_personalMoments.last.createdAt!)) {
+              // 向后翻页，追加到列表末尾
+              _personalMoments.add(tempM);
+            } else if (tempM.createdAt!
+                .isAfter(_personalMoments.first.createdAt!)) {
+              // 向前翻页，插入到列表开头
+              _personalMoments.insert(0, tempM);
+            } else {
+              // 如果不在两端，需要找到合适的插入位置以保持时间顺序
+              int insertIndex = 0;
+              while (insertIndex < _personalMoments.length &&
+                  tempM.createdAt!
+                      .isBefore(_personalMoments[insertIndex].createdAt!)) {
+                insertIndex++;
+              }
+              _personalMoments.insert(insertIndex, tempM);
             }
-            _personalMoments.insert(insertIndex, tempM);
           }
         }
+      } else {
+        // 初始加载时直接赋值
+        _personalMoments = moment.moments;
       }
+
+      // 通知更新
+      onMomentsUpdated.add(List.from(_personalMoments));
     } else {
-      // 初始加载时直接赋值
-      _personalMoments = moment.moments;
-    }
-    
-    // 通知更新
-    onMomentsUpdated.add(List.from(_personalMoments));
-  }else {
       // 原有逻辑保持不变，处理公共朋友圈
       if (moment.moments.isNotEmpty && _moments.isNotEmpty) {
         if (moment.moments.first.id < _moments.last.id) {
@@ -714,6 +717,14 @@ class TopicMe extends Topic {
 
   List<TopicSubscription> get contacts {
     return _contacts.values.toList();
+  }
+
+  /// 创建官方账号
+  /// [params] 官方账号创建参数
+  Future<CtrlMessage> createOfficialAccount(
+      OfficialAccountParams params) async {
+    final response = await _tinodeService.createOfficialAccount(params);
+    return response;
   }
 
   void setLastMessage(String contactName, DataMessage message) {

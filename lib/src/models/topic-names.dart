@@ -5,3 +5,5 @@ var TOPIC_SYS = 'sys';
 var USER_NEW = 'new';
 var TOPIC_CHAN = 'chn';
 var TOPIC_NEW_CHAN = 'nch';
+var TOPIC_P2P = 'p2p';
+var TOPIC_GRP = 'grp';

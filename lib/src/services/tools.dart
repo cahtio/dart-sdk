@@ -67,12 +67,12 @@ class Tools {
 
   /// Figure out if the topic name belongs to a group
   static bool isGroupTopicName(String topicName) {
-    return Tools.topicType(topicName) == 'grp';
+    return Tools.topicType(topicName) == topic_names.TOPIC_GRP;
   }
 
   /// Figure out if the topic name belongs to a p2p topic
   static bool isP2PTopicName(String topicName) {
-    return Tools.topicType(topicName) == 'p2p';
+    return Tools.topicType(topicName) == topic_names.TOPIC_P2P;
   }
 
   /// Figure out if the topic name belongs to a new group

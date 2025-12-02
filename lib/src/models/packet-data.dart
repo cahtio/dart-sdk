@@ -1,3 +1,4 @@
+import 'package:tinode/src/models/officialAccount-params.dart';
 import 'package:tinode/src/models/set-params.dart';
 import 'package:tinode/src/models/get-query.dart';
 
@@ -504,5 +505,27 @@ class DeleteMomentPacketData extends PacketData {
         'id': momId,
       }
     };
+  }
+}
+
+class CreateOfficialAccountPacketData extends PacketData {
+  String topic;
+  OfficialAccountParams? params;
+
+  CreateOfficialAccountPacketData({
+    required this.topic,
+    this.params,
+  });
+
+   @override
+  Map<String, dynamic> toMap() {
+    final map = <String, dynamic>{};
+    map['topic'] = topic;
+    if (params != null) {
+      final paramsMap = params!.toMap();
+      map.addAll(paramsMap);
+    }
+    
+    return map;
   }
 }

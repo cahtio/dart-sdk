@@ -87,6 +87,8 @@ class TopicSubscription {
 
   DataMessage? lastMessage;
 
+  bool? isChannel = false;
+
   TopicSubscription(
       {this.user,
       this.updated,
@@ -106,7 +108,9 @@ class TopicSubscription {
       this.created,
       this.mode,
       this.unread,
-      this.lastMessage});
+      this.lastMessage,
+      this.isChannel
+      });
 
   static TopicSubscription fromMessage(Map<String, dynamic> msg) {
     return TopicSubscription(
@@ -127,6 +131,7 @@ class TopicSubscription {
       seen: msg['seen'] != null ? Seen.fromMessages(msg['seen']) : null,
       noForwarding: msg['noForwarding'] ?? false,
       mode: msg['mode'],
+      isChannel: msg['is_channel'] ?? false
     );
   }
 
@@ -149,7 +154,8 @@ class TopicSubscription {
         seen: seen,
         noForwarding: noForwarding,
         mode: mode,
-        lastMessage: lastMessage);
+        lastMessage: lastMessage,
+        isChannel: isChannel);
   }
 
   TopicDescription asDesc() {
@@ -173,6 +179,7 @@ class TopicSubscription {
     if (user != null) json['user'] = user;
     if (acs != null) json['acs'] = acs;
     if (mode != null) json['mode'] = mode;
+    if (isChannel != null) json['is_channel'] = isChannel;
     return json;
   }
 }

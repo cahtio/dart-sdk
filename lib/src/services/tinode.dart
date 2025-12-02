@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
 import 'package:tinode/src/models/moment.dart';
+import 'package:tinode/src/models/officialAccount-params.dart';
 
 import 'package:tinode/src/models/packet-types.dart' as packet_types;
 import 'package:tinode/src/models/topic-names.dart' as topic_names;
@@ -528,6 +529,22 @@ class TinodeService {
 
     return _send(packet);
   }
+
+  /// 创建公众号
+Future createOfficialAccount(OfficialAccountParams params) async {
+  // 生成新的公众号主题名称
+  String idStr = Tools.getNextUniqueId();
+  String topicName = topic_names.TOPIC_NEW_CHAN + (int.parse(idStr)+1).toString();
+  
+  final data = CreateOfficialAccountPacketData(
+    topic: topicName,
+    params: params,
+  );
+
+  final packet = Packet(packet_types.Sub, data, idStr);
+
+  return _send(packet);
+}
 
   /// Request topic metadata
   Future getMeta(String topicName, GetQuery params) {

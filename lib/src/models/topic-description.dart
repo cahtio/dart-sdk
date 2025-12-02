@@ -43,6 +43,10 @@ class TopicDescription {
 
   bool? noForwarding;
 
+    /// Application-defined data that's available to the current user only
+  dynamic apply;
+  
+
   TopicDescription({
     this.created,
     this.updated,
@@ -57,6 +61,7 @@ class TopicDescription {
     this.private,
     this.noForwarding,
     this.touched,
+    this.apply,
   });
 
   TopicSubscription toSub(String? user) {
@@ -94,6 +99,8 @@ class TopicDescription {
       'clear': clear,
       'public': public,
       'private': private,
+      'noForwarding': noForwarding,
+      'apply': apply,
     };
   }
 
@@ -117,6 +124,7 @@ class TopicDescription {
       clear: msg['clear'],
       noForwarding: msg['noForwarding'],
       touched: DateTime.tryParse(msg['touched']),
+      apply: msg['apply'],
     );
   }
 }
