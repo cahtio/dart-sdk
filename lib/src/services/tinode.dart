@@ -567,6 +567,11 @@ class TinodeService {
       data.cred = params.cred;
     }
 
+    if (params.favorite != null) {
+      what.add('favorite');
+      data.favorite = params.favorite!.toMap();
+    }
+
     if (params.attachments != null) {
       packet.extra = {'attachments': params.attachments};
       what.add('attachments');

@@ -19,6 +19,9 @@ import 'package:tinode/src/services/tools.dart';
 import 'package:tinode/src/models/message.dart';
 import 'package:tinode/src/models/values.dart';
 import 'package:tinode/src/topic.dart';
+import 'package:tinode/src/models/favorite.dart';
+import 'package:tinode/src/models/set-params.dart';
+import 'package:tinode/src/models/officialAccount-params.dart';
 
 /// Special case of Topic for managing data of the current user, including contact list
 class TopicMe extends Topic {
@@ -45,6 +48,11 @@ class TopicMe extends Topic {
       PublishSubject<List<MomentNotification>>();
   List<MomentNotification> _notifications = <MomentNotification>[];
   // static const momentsKey = 'notification';
+
+  /// 收藏列表更新事件
+  PublishSubject<List<Favorite>> onFavoritesUpdated =
+      PublishSubject<List<Favorite>>();
+  final List<Favorite> _favorites = <Favorite>[];
 
   /// This event will be triggered when comments are updated
   PublishSubject<List<MomentComment>> onCommentsUpdated =
@@ -710,6 +718,50 @@ class TopicMe extends Topic {
 
     onCredsUpdated.add(_credentials);
     return ctrl;
+  }
+
+  Future<CtrlMessage> setFavorite(
+      int itemId, String itemType, Map<String, dynamic> data) async {
+    if (!isSubscribed) {
+      return Future.error(Exception("Cannot set favorite in inactive 'me' topic"));
+    }
+    final favorite = Favorite(
+      itemId: itemId,
+      itemType: itemType,
+      data: data,
+    );
+
+    final ctrl = await setMeta(SetParams(
+      favorite: favorite,
+    ));
+
+    // 2xx 视为成功，更新本地缓存并通知监听者
+    if (ctrl.code != null && ctrl.code! >= 200 && ctrl.code! < 300) {
+      _favorites.add(favorite);
+      onFavoritesUpdated.add(List<Favorite>.from(_favorites));
+    }
+
+    return ctrl;
+  }
+
+  Future<CtrlMessage> createOfficialAccount(OfficialAccountParams params) async {
+    if (!isSubscribed) {
+      return Future.error(Exception("Cannot create official account in inactive 'me' topic"));
+    }
+    
+    if (params.setParams == null) {
+      return Future.error(Exception("setParams is required"));
+    }
+    
+    return setMeta(SetParams(
+      desc: params.setParams!.desc,
+      tags: params.setParams!.tags,
+    ));
+  }
+
+  /// 获取当前会话内的收藏列表（仅本地缓存）
+  List<Favorite> get favorites {
+    return List<Favorite>.unmodifiable(_favorites);
   }
 
   List<TopicSubscription> get contacts {

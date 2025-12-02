@@ -1,6 +1,7 @@
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/topic-subscription.dart';
 import 'package:tinode/src/models/credential.dart';
+import 'package:tinode/src/models/favorite.dart';
 
 class SetParams {
   TopicDescription? desc;
@@ -8,8 +9,16 @@ class SetParams {
   List<String>? tags;
   Credential? cred;
   List<String>? attachments;
+  Favorite? favorite;
 
-  SetParams({this.desc, this.sub, this.tags, this.cred, this.attachments});
+  SetParams({
+    this.desc,
+    this.sub,
+    this.tags,
+    this.cred,
+    this.attachments,
+    this.favorite,
+  });
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{};
@@ -22,6 +31,9 @@ class SetParams {
         descMap['public'] = desc!.public;
       }
       map['desc'] = descMap;
+    }
+    if (favorite != null) {
+      map['favorite'] = favorite!.toMap();
     }
     return map;
   }

@@ -176,8 +176,16 @@ class SetPacketData extends PacketData {
   dynamic sub;
   dynamic cred;
   List<String>? tags;
+  dynamic favorite;
 
-  SetPacketData({this.topic, this.desc, this.sub, this.tags, this.cred});
+  SetPacketData({
+    this.topic,
+    this.desc,
+    this.sub,
+    this.tags,
+    this.cred,
+    this.favorite,
+  });
 
   @override
   Map<String, dynamic> toMap() {
@@ -187,6 +195,7 @@ class SetPacketData extends PacketData {
       'sub': sub,
       'tags': tags,
       'cred': cred,
+      'favorite': favorite,
     };
   }
 }
@@ -333,7 +342,6 @@ class GetNotificationsPacketData extends PacketData {
     };
   }
 }
-
 class GetMomentsPacketData extends PacketData {
   String topic;
   String? channelTopic;
@@ -506,3 +514,4 @@ class DeleteMomentPacketData extends PacketData {
     };
   }
 }
+

@@ -43,6 +43,9 @@ class TopicDescription {
 
   bool? noForwarding;
 
+  /// Application-defined apply data for official account
+  dynamic apply;
+
   TopicDescription({
     this.created,
     this.updated,
@@ -57,6 +60,7 @@ class TopicDescription {
     this.private,
     this.noForwarding,
     this.touched,
+    this.apply,
   });
 
   TopicSubscription toSub(String? user) {

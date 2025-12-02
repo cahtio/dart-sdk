@@ -1,5 +1,6 @@
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/access-mode.dart';
+import 'package:tinode/src/services/tools.dart';
 import 'package:tinode/tinode.dart';
 
 /// Info on when the peer was last online
@@ -86,6 +87,11 @@ class TopicSubscription {
   int? unread;
 
   DataMessage? lastMessage;
+
+  /// Check if topic is a channel
+  bool get isChannel {
+    return topic != null ? Tools.isChannelTopicName(topic!) : false;
+  }
 
   TopicSubscription(
       {this.user,
