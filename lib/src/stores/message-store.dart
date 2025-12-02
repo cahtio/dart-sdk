@@ -49,10 +49,10 @@ class MessageStore with StoreMixin {
     await db.delete(kTableName);
   }
 
-  Future<List<DataMessage>> query(String topic) async {
+  Future<List<DataMessage>> query(String topic, {int limit = 20}) async {
     final maps = await db.query(kTableName,
-        where: '$kColumnTopic = ?', whereArgs: [topic], orderBy: kColumnSeq);
-    return maps.map((row) => _convert(row)).toList();
+        where: '$kColumnTopic = ?', whereArgs: [topic], orderBy: '$kColumnSeq desc', limit: limit);
+    return maps.map((row) => _convert(row)).toList().reversed.toList();
   }
 
   Future<DataMessage?> lastMessage(String topic) async {

@@ -186,12 +186,25 @@ class DataMessage {
       topic: msg['topic'],
       from: msg['from'],
       head: msg['head'],
-      ts: msg['ts'],
+      ts: msg['ts'] != null ? (msg['ts'] is String ? DateTime.parse(msg['ts']) : msg['ts']) : null,
       seq: msg['seq'],
       content: msg['content'],
       noForwarding: msg['noForwarding'] ?? false,
       hi: msg['hi'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'topic': topic,
+      'from': from,
+      'head': head,
+      'ts': ts != null ? ts!.toIso8601String() : null,
+      'seq': seq,
+      'content': content,
+      'noForwarding': noForwarding,
+      'hi': hi,
+    };
   }
 }
 

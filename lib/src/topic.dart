@@ -652,9 +652,9 @@ class Topic {
     return _messages.getLast();
   }
 
-  Future<List<DataMessage>?> getStoredMessages() async {
+  Future<List<DataMessage>?> getStoredMessages({int limit = 20}) async {
     if (name == null) return null;
-    return _databaseManager.message.query(name!);
+    return _databaseManager.message.query(name!, limit:limit);
   }
 
   Future<DataMessage?> getLastStoredMessage() async {
@@ -743,8 +743,8 @@ class Topic {
     var msg =  await _databaseManager.message.lastMessage(name!);
     var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
     if(msg != null && msg.seq != null) {
-      _maxSeq = msg.seq!;
-      me.setLastMessage(name ?? '', msg);
+      _maxSeq = max(msg.seq!, _maxSeq);
+      me.setLastMessage(name ?? '', msg, del: true);
     }
   }
 
