@@ -676,7 +676,7 @@ class TopicMe extends Topic {
     );
 
     // 从本地缓存中删除该动态
-    _personalMoments.removeWhere((moment) => moment.id == momId);
+    _moments.removeWhere((moment) => moment.id == momId);
     // 触发更新事件
     onMomentsUpdated.add(_moments);
 
