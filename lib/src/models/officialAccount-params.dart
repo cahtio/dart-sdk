@@ -1,5 +1,6 @@
 import 'package:tinode/src/models/topic-description.dart';
 
+
 /// 官方账号创建参数类
 class OfficialAccountParams {
   
@@ -94,3 +95,4 @@ class OfficialAccountDataParams {
     return map;
   }
 }
+

@@ -52,6 +52,8 @@ export 'package:tinode/src/models/moment.dart';
 // export 'package:tinode/src/models/auth-token.dart';
 export 'package:tinode/src/models/credential.dart';
 export 'package:tinode/src/models/set-params.dart';
+export 'package:tinode/src/models/officialAccount-params.dart';
+export 'package:tinode/src/models/favorite.dart';
 export 'package:tinode/src/meta-get-builder.dart';
 export 'package:tinode/src/models/del-range.dart';
 export 'package:tinode/src/models/get-query.dart';

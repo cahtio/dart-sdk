@@ -43,9 +43,8 @@ class TopicDescription {
 
   bool? noForwarding;
 
-    /// Application-defined data that's available to the current user only
+  /// Application-defined apply data for official account
   dynamic apply;
-  
 
   TopicDescription({
     this.created,
