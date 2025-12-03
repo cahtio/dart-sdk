@@ -202,7 +202,6 @@ class TopicSubscription {
     if (noForwarding != null) json['noForwarding'] = noForwarding;
     if (unread != null) json['unread'] = unread;
     if (lastMessage != null) json['lastMessage'] = lastMessage!.toJson();
-
     return json;
   }
 }
