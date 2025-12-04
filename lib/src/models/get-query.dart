@@ -58,6 +58,35 @@ class GetDataType {
   }
 }
 
+class GetFavoriteQuery {
+  String? type;
+  int? since;
+  int? before;
+  int? limit;
+
+  GetFavoriteQuery({this.type, this.since, this.before, this.limit});
+
+  static GetFavoriteQuery fromMessage(Map<String, dynamic> msg) {
+    return GetFavoriteQuery(
+      type: msg['type'],
+      since: msg['since'],
+      before: msg['before'],
+      limit: msg['limit'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    var map = {
+      'type': type,
+      'since': since,
+      'before': before,
+      'limit': limit,
+    };
+    map.removeWhere((key, value) => value == null);
+    return map;
+  }
+}
+
 class GetQuery {
   String? topic;
   bool? cred;
@@ -67,6 +96,7 @@ class GetQuery {
   GetOptsType? sub;
   GetDataType? data;
   GetDataType? del;
+  GetFavoriteQuery? favorite;
 
   GetQuery({
     this.topic,
@@ -77,6 +107,7 @@ class GetQuery {
     this.tags,
     this.cred,
     this.del,
+    this.favorite,
   });
 
   static GetQuery fromMessage(Map<String, dynamic> msg) {
@@ -89,6 +120,7 @@ class GetQuery {
       desc: msg['desc'] != null ? GetOptsType.fromMessage(msg['desc']) : null,
       sub: msg['sub'] != null ? GetOptsType.fromMessage(msg['sub']) : null,
       tags: msg['tags'],
+      favorite: msg['favorite'] != null ? GetFavoriteQuery.fromMessage(msg['favorite']) : null,
     );
   }
 
@@ -102,6 +134,7 @@ class GetQuery {
       'desc': desc != null ? desc?.toMap() : null,
       'sub': sub != null ? sub?.toMap() : null,
       'tags': tags,
+      'favorite': favorite != null ? favorite?.toMap() : null,
     };
     map.removeWhere((key, value) => value == null);
     return map;
