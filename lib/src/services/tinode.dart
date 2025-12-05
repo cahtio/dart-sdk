@@ -121,6 +121,12 @@ class TinodeService {
 
     onMetaMessage.add(meta);
 
+    if(meta.favorites != null) {
+        print("TinodeService handleMetaMessage favorites: ${meta.favorites?.length}");
+    } else {
+        print("TinodeService handleMetaMessage favorites is null");
+    }
+
     Topic? topic = _cacheManager.get('topic', meta.topic ?? '');
     if (topic != null) {
       topic.routeMeta(meta);
@@ -555,6 +561,7 @@ Future createOfficialAccount(OfficialAccountParams params) async {
     data.desc = params.desc?.toMap();
     data.what = params.what;
     data.sub = params.sub?.toMap();
+    data.favorite = params.favorite?.toMap();
 
     packet.data = data;
     return _send(packet);

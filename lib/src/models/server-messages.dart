@@ -6,6 +6,7 @@ import 'package:tinode/src/models/delete-transaction.dart';
 import 'package:tinode/src/models/topic-description.dart';
 import 'package:tinode/src/models/access-mode.dart';
 import 'package:tinode/src/models/credential.dart';
+import 'package:tinode/src/models/favorite.dart';
 import 'package:tinode/tinode.dart' as packet_types;
 
 class ServerMessage {
@@ -106,6 +107,8 @@ class MetaMessage {
   /// Array of user's credentials
   final List<Credential>? cred;
 
+  final List<Favorite>? favorites;
+
   /// Latest applicable 'delete' transaction
   final DeleteTransaction? del;
 
@@ -117,6 +120,7 @@ class MetaMessage {
       this.sub,
       this.tags,
       this.cred,
+      this.favorites,
       this.del});
 
   static MetaMessage fromMessage(Map<String, dynamic> msg) {
@@ -140,6 +144,12 @@ class MetaMessage {
               .toList()
               .cast<Credential>()
           : [],
+      
+      favorites: msg['favorites'] != null
+          ? (msg['favorites'] as List)
+              .map((e) => Favorite.fromMap(e))
+              .toList()
+          : null,
       del:
           msg['del'] != null ? DeleteTransaction.fromMessage(msg['del']) : null,
     );
