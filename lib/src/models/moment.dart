@@ -6,7 +6,7 @@ import 'packet-types.dart' as packet_types;
 
 class SetMoment {
   String topic;
-  String content;
+  dynamic content;
   int? momId;
   bool? privacy;
   List<Map<String, dynamic>>? data;
@@ -146,7 +146,7 @@ class Moment {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String userId;
-  final String content;
+  dynamic content;
   final int privacy;
   final bool isOwner;
   int? likeCount;
