@@ -256,7 +256,7 @@ class NotePacketData extends PacketData {
 
 class MomentPacketData extends PacketData {
   String topic;
-  String content;
+  dynamic content;
   int? privacy;
   int? momId;
   List<dynamic>? data;
