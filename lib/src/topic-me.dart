@@ -22,6 +22,7 @@ import 'package:tinode/src/models/values.dart';
 import 'package:tinode/src/topic.dart';
 import 'package:tinode/src/models/favorite.dart';
 import 'package:tinode/src/models/set-params.dart';
+import 'package:tinode/src/models/get-query.dart';
 
 /// Special case of Topic for managing data of the current user, including contact list
 class TopicMe extends Topic {
@@ -81,6 +82,56 @@ class TopicMe extends Topic {
     _loggerService = GetIt.I.get<LoggerService>();
     _authService = GetIt.I.get<AuthService>();
     _databaseManager = GetIt.I.get<DatabaseManager>();
+  }
+
+  @override
+  void routeMeta(MetaMessage meta) {
+    print(
+        'TopicMe routeMeta: favorites count: ${meta.favorites?.length ?? 'null'}');
+    if (meta.favorites != null && meta.favorites!.isNotEmpty) {
+      // 将新数据与本地缓存合并，按 id 倒序去重
+      final Map<int, Favorite> map = {};
+      for (final f in _favorites) {
+        if (f.id != null) {
+          map[f.id!] = f;
+        }
+      }
+      for (final f in meta.favorites!) {
+        if (f.id != null) {
+          map[f.id!] = f;
+        }
+      }
+
+      final ids = map.keys.toList()..sort((b, a) => a.compareTo(b)); // desc
+      _favorites
+        ..clear()
+        ..addAll(ids.map((id) => map[id]!));
+
+      print(
+          'TopicMe routeMeta: merged favorites, total count: ${_favorites.length}');
+      onFavoritesUpdated.add(List<Favorite>.from(_favorites));
+    }
+    super.routeMeta(meta);
+  }
+
+  /// 获取收藏列表，支持分页
+  Future getFavorites({
+    String type = 'message',
+    int limit = 20,
+    int? since,
+    int? before,
+  }) {
+    return getMeta(
+      GetQuery(
+        what: 'favorite',
+        favorite: GetFavoriteQuery(
+          type: type,
+          limit: limit,
+          since: since,
+          before: before,
+        ),
+      ),
+    );
   }
 
   /// Override the original Topic.processMetaDesc.
@@ -739,7 +790,9 @@ class TopicMe extends Topic {
 
     // 2xx 视为成功，更新本地缓存并通知监听者
     if (ctrl.code != null && ctrl.code! >= 200 && ctrl.code! < 300) {
+      print('TopicMe setFavorite success, add to local list. oldLen=${_favorites.length}');
       _favorites.add(favorite);
+      print('TopicMe setFavorite after add, newLen=${_favorites.length}');
       onFavoritesUpdated.add(List<Favorite>.from(_favorites));
     }
 
