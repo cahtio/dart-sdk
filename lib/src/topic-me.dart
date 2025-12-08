@@ -774,7 +774,8 @@ class TopicMe extends Topic {
   }
 
   Future<CtrlMessage> setFavorite(
-      int itemId, String itemType, Map<String, dynamic> data) async {
+      int itemId, String itemType, Map<String, dynamic> data,
+      {List<String>? attachments}) async {
     if (!isSubscribed) {
       return Future.error(Exception("Cannot set favorite in inactive 'me' topic"));
     }
@@ -782,6 +783,7 @@ class TopicMe extends Topic {
       itemId: itemId,
       itemType: itemType,
       data: data,
+      attachments: attachments,
     );
 
     final ctrl = await setMeta(SetParams(
