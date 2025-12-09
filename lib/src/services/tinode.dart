@@ -121,10 +121,11 @@ class TinodeService {
 
     onMetaMessage.add(meta);
 
-    if(meta.favorites != null) {
-        print("TinodeService handleMetaMessage favorites: ${meta.favorites?.length}");
+    if (meta.favorites != null) {
+      print(
+          "TinodeService handleMetaMessage favorites: ${meta.favorites?.length}");
     } else {
-        print("TinodeService handleMetaMessage favorites is null");
+      print("TinodeService handleMetaMessage favorites is null");
     }
 
     Topic? topic = _cacheManager.get('topic', meta.topic ?? '');
@@ -451,7 +452,7 @@ class TinodeService {
       limit: limit,
     );
 
-    String idStr = id?? Tools.getNextUniqueId();
+    String idStr = id ?? Tools.getNextUniqueId();
     final packet = Packet(packet_types.GetMoment, data, idStr);
 
     return _send(packet);
@@ -537,20 +538,21 @@ class TinodeService {
   }
 
   /// 创建公众号
-Future createOfficialAccount(OfficialAccountParams params) async {
-  // 生成新的公众号主题名称
-  String idStr = Tools.getNextUniqueId();
-  String topicName = topic_names.TOPIC_NEW_CHAN + (int.parse(idStr)+1).toString();
-  
-  final data = CreateOfficialAccountPacketData(
-    topic: topicName,
-    params: params,
-  );
+  Future createOfficialAccount(OfficialAccountParams params, ExtraParams extra) async {
+    // 生成新的公众号主题名称
+    String idStr = Tools.getNextUniqueId();
+    String topicName =
+        topic_names.TOPIC_NEW_CHAN + (int.parse(idStr) + 1).toString();
 
-  final packet = Packet(packet_types.Sub, data, idStr);
+    final data = CreateOfficialAccountPacketData(
+      topic: topicName,
+      params: params,
+    );
 
-  return _send(packet);
-}
+    final packet = Packet(packet_types.Sub, data, idStr);
+    packet.extra = extra.toMap();
+    return _send(packet);
+  }
 
   /// Request topic metadata
   Future getMeta(String topicName, GetQuery params) {

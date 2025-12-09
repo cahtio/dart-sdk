@@ -1,5 +1,6 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tinode/src/models/category.dart';
 
 import 'dart:async';
 import 'dart:math';

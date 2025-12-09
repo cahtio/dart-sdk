@@ -1,6 +1,5 @@
 import 'package:tinode/src/models/topic-description.dart';
 
-
 /// 官方账号创建参数类
 class OfficialAccountParams {
   
@@ -18,7 +17,7 @@ class OfficialAccountParams {
   /// 转换为Map格式
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{};
-        if (setParams != null) map['set'] = setParams!.toMap();
+    if (setParams != null) map['set'] = setParams!.toMap();
     if (getParams != null) map['get'] = getParams!.toMap();
     
     return map;
@@ -32,6 +31,7 @@ class OfficialAccountSetParams {
   
   /// 标签列表
   final List<String>? tags;
+  
 
   OfficialAccountSetParams({
     this.desc,
@@ -50,6 +50,24 @@ class OfficialAccountSetParams {
     }
     
     if (tags != null) map['tags'] = tags;
+    
+    return map;
+  }
+}
+
+/// 额外参数类（用于存储附件等额外信息）
+class ExtraParams {
+  /// 附件列表（头像、营业执照、身份信息等）
+  final List<String>? attachments;
+
+  ExtraParams({
+    this.attachments,
+  });
+
+  Map<String, dynamic> toMap() {
+    final map = <String, dynamic>{};
+    
+    if (attachments != null) map['attachments'] = attachments;
     
     return map;
   }
@@ -95,4 +113,3 @@ class OfficialAccountDataParams {
     return map;
   }
 }
-

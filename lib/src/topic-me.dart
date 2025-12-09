@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tinode/src/models/category.dart';
 import 'package:tinode/src/models/moment.dart';
 import 'package:tinode/src/models/officialAccount-params.dart';
 import 'dart:math';
@@ -54,6 +55,10 @@ class TopicMe extends Topic {
   PublishSubject<List<Favorite>> onFavoritesUpdated =
       PublishSubject<List<Favorite>>();
   final List<Favorite> _favorites = <Favorite>[];
+
+  PublishSubject<List<Category>> onCategoriesUpdated =
+      PublishSubject<List<Category>>();
+  final List<Category> _categories = <Category>[];
 
   /// This event will be triggered when comments are updated
   PublishSubject<List<MomentComment>> onCommentsUpdated =
@@ -111,6 +116,31 @@ class TopicMe extends Topic {
           'TopicMe routeMeta: merged favorites, total count: ${_favorites.length}');
       onFavoritesUpdated.add(List<Favorite>.from(_favorites));
     }
+
+    if (meta.category != null && meta.category!.isNotEmpty) {
+      // 将新数据与本地缓存合并，按 id 倒序去重
+      final Map<int, Category> map = {};
+      for (final c in _categories) {
+        if (c.id != null) {
+          map[c.id!] = c;
+        }
+      }
+      for (final c in meta.category!) {
+        if (c.id != null) {
+          map[c.id!] = c;
+        }
+      }
+
+      final ids = map.keys.toList()..sort((b, a) => a.compareTo(b)); // desc
+      _categories
+        ..clear()
+        ..addAll(ids.map((id) => map[id]!));
+
+      print(
+          'TopicMe routeMeta: merged categories, total count: ${_categories.length}');
+      onCategoriesUpdated.add(List<Category>.from(_categories));
+    }
+
     super.routeMeta(meta);
   }
 
@@ -130,6 +160,15 @@ class TopicMe extends Topic {
           since: since,
           before: before,
         ),
+      ),
+    );
+  }
+
+  /// 获取分类列表，支持分页
+  Future getCategories() {
+    return getMeta(
+      GetQuery(
+        what: 'categories',
       ),
     );
   }
@@ -776,7 +815,8 @@ class TopicMe extends Topic {
   Future<CtrlMessage> setFavorite(
       int itemId, String itemType, Map<String, dynamic> data) async {
     if (!isSubscribed) {
-      return Future.error(Exception("Cannot set favorite in inactive 'me' topic"));
+      return Future.error(
+          Exception("Cannot set favorite in inactive 'me' topic"));
     }
     final favorite = Favorite(
       itemId: itemId,
@@ -790,7 +830,8 @@ class TopicMe extends Topic {
 
     // 2xx 视为成功，更新本地缓存并通知监听者
     if (ctrl.code != null && ctrl.code! >= 200 && ctrl.code! < 300) {
-      print('TopicMe setFavorite success, add to local list. oldLen=${_favorites.length}');
+      print(
+          'TopicMe setFavorite success, add to local list. oldLen=${_favorites.length}');
       _favorites.add(favorite);
       print('TopicMe setFavorite after add, newLen=${_favorites.length}');
       onFavoritesUpdated.add(List<Favorite>.from(_favorites));
@@ -811,12 +852,13 @@ class TopicMe extends Topic {
   /// 创建官方账号
   /// [params] 官方账号创建参数
   Future<CtrlMessage> createOfficialAccount(
-      OfficialAccountParams params) async {
-    final response = await _tinodeService.createOfficialAccount(params);
+      OfficialAccountParams params, ExtraParams extra) async {
+    final response = await _tinodeService.createOfficialAccount(params, extra);
     return response;
   }
 
-  void setLastMessage(String contactName, DataMessage message, {bool del = false}) {
+  void setLastMessage(String contactName, DataMessage message,
+      {bool del = false}) {
     final cont = _contacts[contactName];
     // print('setLastMessage  ${message.seq} ${message.content}');
     if (cont == null) return;
@@ -824,13 +866,12 @@ class TopicMe extends Topic {
       cont.updated = message.ts;
       cont.lastMessage = message;
       onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
-    } else if(del){
+    } else if (del) {
       // 删除最后一条消息 才会进这里
       cont.updated = DateTime.now();
       cont.lastMessage = message;
       onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
     }
-     
   }
 
   /// Update a cached contact with new read/received/message count

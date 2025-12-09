@@ -1,4 +1,5 @@
 
+import 'package:tinode/src/models/category.dart';
 import 'package:tinode/src/models/moment.dart';
 import 'package:tinode/src/models/del-range.dart';
 import 'package:tinode/src/models/topic-subscription.dart';
@@ -109,6 +110,8 @@ class MetaMessage {
 
   final List<Favorite>? favorites;
 
+  final List<Category>? category;
+
   /// Latest applicable 'delete' transaction
   final DeleteTransaction? del;
 
@@ -121,6 +124,7 @@ class MetaMessage {
       this.tags,
       this.cred,
       this.favorites,
+      this.category,
       this.del});
 
   static MetaMessage fromMessage(Map<String, dynamic> msg) {
@@ -148,6 +152,11 @@ class MetaMessage {
       favorites: msg['favorites'] != null
           ? (msg['favorites'] as List)
               .map((e) => Favorite.fromMap(e))
+              .toList()
+          : null,
+      category: msg['category'] != null
+          ? (msg['category'] as List)
+              .map((e) => Category.fromMap(e))
               .toList()
           : null,
       del:
