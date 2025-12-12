@@ -14,12 +14,16 @@ class Favorite {
   /// 原始数据（DataMessage 的 map）
   Map<String, dynamic>? data;
 
+  /// 收藏附件持久化链接列表
+  List<String>? attachments;
+
   Favorite({
     this.id,
     this.createdAt,
     this.itemId,
     this.itemType,
     this.data,
+    this.attachments,
   });
 
   Map<String, dynamic> toMap() {
@@ -39,6 +43,9 @@ class Favorite {
     if (data != null) {
       map['data'] = data;
     }
+    if (attachments != null && attachments!.isNotEmpty) {
+      map['attachments'] = attachments;
+    }
     return map;
   }
 
@@ -51,6 +58,9 @@ class Favorite {
       itemId: map['itemId'],
       itemType: map['itemType'],
       data: (map['data'] as Map?)?.cast<String, dynamic>(),
+      attachments: (map['attachments'] as List?)
+          ?.map((e) => e.toString())
+          .toList(),
     );
   }
 }
