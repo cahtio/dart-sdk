@@ -259,6 +259,8 @@ class MomentPacketData extends PacketData {
   dynamic content;
   int? privacy;
   int? momId;
+  String? channelTopic;
+  String? title;
   List<dynamic>? data;
   List<dynamic>? attachments;
 
@@ -267,6 +269,8 @@ class MomentPacketData extends PacketData {
       required this.content,
       this.privacy,
       this.momId,
+      this.channelTopic,
+      this.title,
       this.data,
       this.attachments});
 
@@ -277,6 +281,8 @@ class MomentPacketData extends PacketData {
     if (privacy != null) dataMap['privacy'] = privacy;
     if (momId != null) dataMap['momId'] = momId;
     if (data !=null) dataMap['data'] = data;
+    if (channelTopic != null) dataMap['topic'] = channelTopic;
+    if (title != null) dataMap['title'] = title;
     if (attachments?.isNotEmpty ?? true) dataMap['attachments'] = attachments;
 
     return {

@@ -7,6 +7,8 @@ import 'packet-types.dart' as packet_types;
 class SetMoment {
   String topic;
   dynamic content;
+  String? channelTopic;
+  String? title;
   int? momId;
   bool? privacy;
   List<Map<String, dynamic>>? data;
@@ -17,9 +19,12 @@ class SetMoment {
   SetMoment(
       {required this.topic,
       required this.content,
+      this.channelTopic,
+      this.title,
       this.momId,
       this.privacy,
-      this.data}) {
+      this.data,
+      this.attachments}) {
     _packetGenerator = GetIt.I.get<PacketGenerator>();
   }
 
@@ -29,8 +34,10 @@ class SetMoment {
     packetData.content = content;
     if (privacy != null) packetData.privacy = privacy! ? 1 : 0;
     packetData.momId = momId;
+    packetData.title = title;
     packetData.attachments = attachments;
     packetData.data = data;
+    packetData.channelTopic = channelTopic;
     return packet;
   }
 }
