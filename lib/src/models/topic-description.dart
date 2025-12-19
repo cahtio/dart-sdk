@@ -43,6 +43,8 @@ class TopicDescription {
 
   bool? noForwarding;
 
+  bool? chan;
+
   /// Application-defined apply data for official account
   dynamic apply;
 
@@ -60,6 +62,7 @@ class TopicDescription {
     this.private,
     this.noForwarding,
     this.touched,
+    this.chan,
     this.apply,
   });
 
@@ -99,6 +102,7 @@ class TopicDescription {
       'public': public,
       'private': private,
       'noForwarding': noForwarding,
+      'chan': chan,
       'apply': apply,
     };
   }
@@ -123,6 +127,7 @@ class TopicDescription {
       clear: msg['clear'],
       noForwarding: msg['noForwarding'],
       touched: DateTime.tryParse(msg['touched']),
+      chan: msg['chan'],
       apply: msg['apply'],
     );
   }

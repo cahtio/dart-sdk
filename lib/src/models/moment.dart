@@ -83,7 +83,7 @@ class PhotoData {
 
   factory PhotoData.fromMessage(Map<String, dynamic> msg) {
     return PhotoData(
-      data: msg['data'] ?? '',
+      data: msg['ref'] ?? '',
       type: msg['type'] ?? '',
     );
   }
@@ -166,6 +166,8 @@ class Moment {
   final Moment? shareFromMoment;
   final OwnerUser? ownerUser;
   List<Map<String, dynamic>>? data;
+  final String? topic;
+  final TopicInfo? topicInfo;
 
   Moment({
     required this.id,
@@ -185,6 +187,8 @@ class Moment {
     this.shareFromMoment,
     this.ownerUser,
     this.data,
+    this.topic,
+    this.topicInfo,
   });
 
   factory Moment.fromMessage(Map<String, dynamic> msg) {
@@ -216,6 +220,24 @@ class Moment {
       data: msg['data'] != null
           ? (msg['data'] as List<dynamic>).cast<Map<String, dynamic>>()
           : null,
+      topic: msg['topic'],
+      topicInfo: msg['topicInfo'] != null
+          ? TopicInfo.fromMessage(msg['topicInfo'])
+          : null,
+    );
+  }
+}
+
+class TopicInfo {
+  final String name;
+  final PublicData public;
+
+  TopicInfo({required this.name, required this.public});
+
+  factory TopicInfo.fromMessage(Map<String, dynamic> msg) {
+    return TopicInfo(
+      name: msg['name'] ?? '',
+      public: PublicData.fromMessage(msg['public'] ?? {}),
     );
   }
 }
