@@ -177,6 +177,7 @@ class TopicSubscription {
       seq: seq,
       touched: touched,
       updated: updated,
+      chan: isChannel,
     );
   }
 

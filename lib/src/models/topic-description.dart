@@ -84,7 +84,7 @@ class TopicDescription {
         deleted: null,
         created: created,
         mode: null,
-        unread: null);
+        isChannel: chan,);
   }
 
   Map<String, dynamic> toJson() {

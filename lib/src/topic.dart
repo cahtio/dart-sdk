@@ -1008,6 +1008,7 @@ class Topic {
             recv: desc.recv,
             public: desc.public,
             private: desc.private,
+            isChannel: desc.chan
           )
         ]);
       }
@@ -1028,6 +1029,7 @@ class Topic {
             updated: sub.updated ?? DateTime.now(),
             touched: sub.updated,
             acs: sub.acs,
+            chan: sub.isChannel,
           ));
         }
         user = _updateCachedUser(sub.user!, sub)!;
@@ -1127,6 +1129,7 @@ class Topic {
       cached.touched = object.touched ?? cached.touched;
       cached.updated = object.updated ?? cached.updated;
       cached.user = object.user ?? cached.user;
+      cached.isChannel = object.isChannel ?? cached.isChannel;
       _cacheManager.putUser(userId, cached);
     } else {
       _cacheManager.putUser(userId, object);
