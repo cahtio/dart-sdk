@@ -65,6 +65,12 @@ class TopicMe extends Topic {
       PublishSubject<List<MomentComment>>();
   Map<int, List<MomentComment>> _commentsMap = {};
 
+  /// Current moment detail cache
+  Moment? _currentMomentDetail;
+
+  /// This event will be triggered when moment detail is updated
+  PublishSubject<Moment?> onMomentDetailUpdated = PublishSubject<Moment?>();
+
   // Credentials such as email or phone number.
   List<Credential> _credentials = [];
 
@@ -292,7 +298,6 @@ class TopicMe extends Topic {
 
       onMetaSub.add(cont);
     }
-
     onSubsUpdated.add(_contacts.values.toList());
   }
 
@@ -631,6 +636,17 @@ class TopicMe extends Topic {
     onCommentsUpdated.add(_commentsMap[momentId]!);
   }
 
+  /// 处理朋友圈详情响应
+  void routeMomentDetail(MomentDetailMessage momentMessage) {
+    if (momentMessage.moment != null) {
+      // 更新朋友圈详情缓存
+      _currentMomentDetail = momentMessage.moment;
+
+      // 触发朋友圈详情更新事件
+      onMomentDetailUpdated.add(_currentMomentDetail);
+    }
+  }
+
   @override
   Future<CtrlMessage> publishMessage(Message a) {
     return Future.error(Exception("Publishing to 'me' is not supported"));
@@ -700,6 +716,17 @@ class TopicMe extends Topic {
       since: since,
       before: before,
       limit: limit,
+    );
+    return response;
+  }
+
+// 获取朋友圈详情
+  Future<CtrlMessage> getMomentDetail({
+    required int momId,
+  }) async {
+    final response = await _tinodeService.getMomentDetail(
+      topic: topic_names.TOPIC_ME,
+      momId: momId,
     );
     return response;
   }

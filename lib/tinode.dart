@@ -240,6 +240,8 @@ class Tinode {
       _tinodeService.handleCommentMessage(message.comments);
     } else if (message.notification != null) {
       _tinodeService.handleNotificationMessage(message.notification);
+    }else if (message.momentDetail != null) {
+      _tinodeService.handleMomentDetailMessage(message.momentDetail);
     }
   }
 

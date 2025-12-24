@@ -1,4 +1,3 @@
-
 import 'package:tinode/src/models/category.dart';
 import 'package:tinode/src/models/moment.dart';
 import 'package:tinode/src/models/del-range.dart';
@@ -19,9 +18,18 @@ class ServerMessage {
   final MomentMessage? moment;
   final CommentMessage? comments;
   final NotificationMessage? notification;
+  final MomentDetailMessage? momentDetail;
 
   ServerMessage(
-      {this.ctrl, this.meta, this.data, this.pres, this.info, this.moment, this.comments, this.notification});
+      {this.ctrl,
+      this.meta,
+      this.data,
+      this.pres,
+      this.info,
+      this.moment,
+      this.comments,
+      this.notification,
+      this.momentDetail});
 
   static ServerMessage fromMessage(Map<String, dynamic> msg) {
     return ServerMessage(
@@ -30,14 +38,21 @@ class ServerMessage {
       data: msg['data'] != null ? DataMessage.fromMessage(msg['data']) : null,
       pres: msg['pres'] != null ? PresMessage.fromMessage(msg['pres']) : null,
       info: msg['info'] != null ? InfoMessage.fromMessage(msg['info']) : null,
-      moment: msg['moment_res'] != null && msg['moment_res'][packet_types.ResMoment] != null
-          ? MomentMessage.fromMessage(msg['moment_res']) 
+      moment: msg['moment_res'] != null &&
+              msg['moment_res'][packet_types.ResMoment] != null
+          ? MomentMessage.fromMessage(msg['moment_res'])
           : null,
-      comments: msg['moment_res'] != null && msg['moment_res'][packet_types.ResComments] != null
+      comments: msg['moment_res'] != null &&
+              msg['moment_res'][packet_types.ResComments] != null
           ? CommentMessage.fromMessage(msg['moment_res'])
           : null,
-      notification: msg['moment_res'] != null && msg['moment_res'][packet_types.ResNotification] != null
+      notification: msg['moment_res'] != null &&
+              msg['moment_res'][packet_types.ResNotification] != null
           ? NotificationMessage.fromMessage(msg['moment_res'])
+          : null,
+      momentDetail: msg['moment_res'] != null &&
+              msg['moment_res'][packet_types.GetMoment] != null
+          ? MomentDetailMessage.fromMessage(msg['moment_res'])
           : null,
     );
   }
@@ -148,16 +163,12 @@ class MetaMessage {
               .toList()
               .cast<Credential>()
           : [],
-      
+
       favorites: msg['favorites'] != null
-          ? (msg['favorites'] as List)
-              .map((e) => Favorite.fromMap(e))
-              .toList()
+          ? (msg['favorites'] as List).map((e) => Favorite.fromMap(e)).toList()
           : null,
       category: msg['category'] != null
-          ? (msg['category'] as List)
-              .map((e) => Category.fromMap(e))
-              .toList()
+          ? (msg['category'] as List).map((e) => Category.fromMap(e)).toList()
           : null,
       del:
           msg['del'] != null ? DeleteTransaction.fromMessage(msg['del']) : null,
@@ -205,7 +216,9 @@ class DataMessage {
       topic: msg['topic'],
       from: msg['from'],
       head: msg['head'],
-      ts: msg['ts'] != null ? (msg['ts'] is String ? DateTime.parse(msg['ts']) : msg['ts']) : null,
+      ts: msg['ts'] != null
+          ? (msg['ts'] is String ? DateTime.parse(msg['ts']) : msg['ts'])
+          : null,
       seq: msg['seq'],
       content: msg['content'],
       noForwarding: msg['noForwarding'] ?? false,
@@ -282,7 +295,9 @@ class PresMessage {
       seq: msg['seq'],
       clear: msg['clear'],
       delseq: msg['delseq'] != null
-          ? (msg['delseq'] as List).map((seq) => DelRange.fromMessage(seq)).toList()
+          ? (msg['delseq'] as List)
+              .map((seq) => DelRange.fromMessage(seq))
+              .toList()
           : null,
       ua: msg['ua'],
       act: msg['act'],
@@ -312,11 +327,18 @@ class InfoMessage {
   final String? event;
 
   final List<DelRange>? delseq;
-  
+
   final dynamic payload;
 
   InfoMessage(
-      {this.topic, this.src, this.from, this.what, this.seq, this.event, this.delseq, this.payload});
+      {this.topic,
+      this.src,
+      this.from,
+      this.what,
+      this.seq,
+      this.event,
+      this.delseq,
+      this.payload});
 
   static InfoMessage fromMessage(Map<String, dynamic> msg) {
     return InfoMessage(
@@ -327,7 +349,9 @@ class InfoMessage {
         seq: msg['seq'],
         event: msg['event'],
         delseq: msg['delseq'] != null
-            ? (msg['delseq'] as List).map((seq) => DelRange.fromMessage(seq)).toList()
+            ? (msg['delseq'] as List)
+                .map((seq) => DelRange.fromMessage(seq))
+                .toList()
             : null,
         payload: msg['payload']);
   }
@@ -354,22 +378,52 @@ class MomentMessage {
     );
   }
 }
+/// 朋友圈详情消息
+class MomentDetailMessage {
+  /// 消息ID
+  final String? id;
 
+  final String? topic;
+
+  /// 朋友圈详情数据
+  final Moment? moment;
+
+  MomentDetailMessage({
+    this.id,
+    this.topic,
+    this.moment,
+  });
+
+  static MomentDetailMessage fromMessage(Map<String, dynamic> msg) {
+    return MomentDetailMessage(
+      id: msg['id'],
+      topic: msg['topic'],
+      moment: msg[packet_types.GetMoment] != null
+          ? Moment.fromMessage(msg[packet_types.GetMoment])
+          : null,
+    );
+  }
+
+  @override
+  String toString() =>
+      'MomentDetailMessage(id: $id, topic: $topic,moments: $moment)';
+}
 class CommentMessage {
   final String id;
   final String topic;
   final List<MomentComment> comments;
 
-  CommentMessage({required this.id, required this.topic, required this.comments});
+  CommentMessage(
+      {required this.id, required this.topic, required this.comments});
 
   factory CommentMessage.fromMessage(Map<String, dynamic> msg) {
     final commentsList = msg[packet_types.ResComments] as List<dynamic>? ?? [];
-   
+
     final comments = commentsList
         .map((commentData) =>
             MomentComment.fromMessage(commentData as Map<String, dynamic>))
         .toList();
- print('CommentMessage.fromMessage1 $comments');
+    print('CommentMessage.fromMessage1 $comments');
     return CommentMessage(
       id: msg['id']?.toString() ?? '',
       topic: msg['topic'] ?? '',
@@ -383,13 +437,14 @@ class NotificationMessage {
   final String topic;
   final List<MomentNotification> notifications;
 
-  NotificationMessage({required this.id, required this.topic, required this.notifications});
+  NotificationMessage(
+      {required this.id, required this.topic, required this.notifications});
 
   factory NotificationMessage.fromMessage(Map<String, dynamic> msg) {
     final notificationsList = msg['notifications'] as List<dynamic>? ?? [];
     final notifications = notificationsList
-        .map((notificationData) =>
-            MomentNotification.fromMessage(notificationData as Map<String, dynamic>))
+        .map((notificationData) => MomentNotification.fromMessage(
+            notificationData as Map<String, dynamic>))
         .toList();
 
     return NotificationMessage(

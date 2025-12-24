@@ -524,6 +524,29 @@ class DeleteMomentPacketData extends PacketData {
   }
 }
 
+/// 获取朋友圈详情的包数据类
+class GetMomentDetailPacketData extends PacketData {
+  String topic;
+  int momId;
+
+  GetMomentDetailPacketData({
+    required this.topic,
+    required this.momId,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'topic': topic,
+      'get': {
+        'data': {
+          'momId': momId,
+        }
+      }
+    };
+  }
+}
+
 class CreateOfficialAccountPacketData extends PacketData {
   String topic;
   OfficialAccountParams? params;

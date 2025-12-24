@@ -205,6 +205,13 @@ class TinodeService {
     topicMe.routeComments(commentMessage);
   }
 
+  void handleMomentDetailMessage(MomentDetailMessage? momentDetail) {
+    if (momentDetail == null) return;
+
+    var topicMe = getTopic(topic_names.TOPIC_ME) as TopicMe;
+    topicMe.routeMomentDetail(momentDetail);
+  }
+
   /// Sends a packet using connection service
   Future<dynamic> _send(Packet pkt) {
     var future = Future<dynamic>.value(null);
@@ -537,8 +544,27 @@ class TinodeService {
     return _send(packet);
   }
 
+  /// 获取朋友圈详情
+  /// [topic] 话题名称
+  /// [momId] 动态ID
+  Future getMomentDetail({
+    required String topic,
+    required int momId,
+  }) async {
+    final data = GetMomentDetailPacketData(
+      topic: topic,
+      momId: momId,
+    );
+
+    final packet =
+        Packet(packet_types.GetMoment, data, Tools.getNextUniqueId());
+
+    return _send(packet);
+  }
+
   /// 创建公众号
-  Future createOfficialAccount(OfficialAccountParams params, ExtraParams extra) async {
+  Future createOfficialAccount(
+      OfficialAccountParams params, ExtraParams extra) async {
     // 生成新的公众号主题名称
     String idStr = Tools.getNextUniqueId();
     String topicName =
