@@ -90,6 +90,9 @@ class TopicSubscription {
 
   bool? isChannel = false;
 
+  /// 申请状态
+  int? apply_status = 0;
+
   TopicSubscription(
       {this.user,
       this.updated,
@@ -111,6 +114,7 @@ class TopicSubscription {
       this.unread,
       this.lastMessage,
       this.isChannel
+      ,this.apply_status
       });
 
   static TopicSubscription fromMessage(Map<String, dynamic> msg) {
@@ -133,6 +137,7 @@ class TopicSubscription {
       noForwarding: msg['noForwarding'] ?? false,
       mode: msg['mode'],
       isChannel: msg['is_channel'] ?? false,
+      apply_status: msg['apply_status'] ?? 0,
       unread: msg['unread'],
       lastMessage: msg['lastMessage'] != null
           ? DataMessage.fromMessage(msg['lastMessage'])
