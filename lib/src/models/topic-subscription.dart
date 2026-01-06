@@ -90,6 +90,8 @@ class TopicSubscription {
 
   bool? isChannel = false;
 
+  int? subCount;
+
   /// 申请状态
   int? apply_status = 0;
 
@@ -113,9 +115,9 @@ class TopicSubscription {
       this.mode,
       this.unread,
       this.lastMessage,
-      this.isChannel
-      ,this.apply_status
-      });
+      this.isChannel,
+      this.subCount,
+      this.apply_status});
 
   static TopicSubscription fromMessage(Map<String, dynamic> msg) {
     return TopicSubscription(
@@ -139,6 +141,7 @@ class TopicSubscription {
       isChannel: msg['is_channel'] ?? false,
       apply_status: msg['apply_status'] ?? 0,
       unread: msg['unread'],
+      subCount: msg['sub_count'],
       lastMessage: msg['lastMessage'] != null
           ? DataMessage.fromMessage(msg['lastMessage'])
           : null,
@@ -166,6 +169,7 @@ class TopicSubscription {
         mode: mode,
         isChannel: isChannel,
         unread: unread,
+        subCount: subCount,
         lastMessage: lastMessage);
   }
 
@@ -207,6 +211,7 @@ class TopicSubscription {
     // if (seen != null) json['seen'] = seen!.toJson();
     if (noForwarding != null) json['noForwarding'] = noForwarding;
     if (unread != null) json['unread'] = unread;
+    if (subCount != null) json['sub_count'] = subCount;
     if (lastMessage != null) json['lastMessage'] = lastMessage!.toJson();
     return json;
   }
