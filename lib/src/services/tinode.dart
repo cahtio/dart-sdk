@@ -121,12 +121,12 @@ class TinodeService {
 
     onMetaMessage.add(meta);
 
-    if (meta.favorites != null) {
-      print(
-          "TinodeService handleMetaMessage favorites: ${meta.favorites?.length}");
-    } else {
-      print("TinodeService handleMetaMessage favorites is null");
-    }
+    // if (meta.favorites != null) {
+    //   print(
+    //       "TinodeService handleMetaMessage favorites: ${meta.favorites?.length}");
+    // } else {
+    //   print("TinodeService handleMetaMessage favorites is null");
+    // }
 
     Topic? topic = _cacheManager.get('topic', meta.topic ?? '');
     if (topic != null) {

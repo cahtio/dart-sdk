@@ -71,17 +71,12 @@ class MessageStore with StoreMixin {
       return null;
     }
 
-    if (message.from?.isEmpty ?? true) {
-      _logError('Received error, message from is empty or null!');
-      return null;
-    }
-
     if (message.seq == null) {
       _logError('Received error, message seq is null!');
       return null;
     }
 
-    final count = await _count(message.topic!, message.from!, message.seq!);
+    final count = await _count(message.topic!, message.from, message.seq!);
     if (count > 0) {
       await _update(message);
     } else {
@@ -130,13 +125,13 @@ class MessageStore with StoreMixin {
     );
   }
 
-  Future<int> _count(String topic, String from, int seq) async {
+  Future<int> _count(String topic, String? from, int seq) async {
     final count = Sqflite.firstIntValue(await db.query(kTableName,
         columns: ['COUNT(*)'],
         where: '$kColumnTopic = ? AND $kColumnFrom = ? AND $kColumnSeq = ?',
-        whereArgs: [topic, from, seq]));
+        whereArgs: [topic, from ?? '', seq]));
     if (count == null) {
-      _logError('select count error; topic: $topic, from: $from, seq: $seq');
+      _logError('select count error; topic: $topic, from: ${from ?? ''}, seq: $seq');
     }
     return count ?? 0;
   }
@@ -147,11 +142,6 @@ class MessageStore with StoreMixin {
       return null;
     }
 
-    if (message.from?.isEmpty ?? true) {
-      _logError('insert error, message from is empty or null!');
-      return null;
-    }
-
     if (message.seq == null) {
       _logError('insert error, message seq is null!');
       return null;
@@ -159,7 +149,7 @@ class MessageStore with StoreMixin {
 
     return db.insert(kTableName, {
       kColumnTopic: message.topic,
-      kColumnFrom: message.from,
+      kColumnFrom: message.from ?? '',
       kColumnHead: message.head == null ? null : jsonEncode(message.head),
       kColumnContent: message.content is String
           ? message.content
@@ -173,11 +163,6 @@ class MessageStore with StoreMixin {
   Future<int?> _update(DataMessage message) async {
     if (message.topic?.isEmpty ?? true) {
       _logError('update error, message topic is empty or null!');
-      return null;
-    }
-
-    if (message.from?.isEmpty ?? true) {
-      _logError('update error, message from is empty or null!');
       return null;
     }
 

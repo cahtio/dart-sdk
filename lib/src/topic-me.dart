@@ -97,8 +97,7 @@ class TopicMe extends Topic {
 
   @override
   void routeMeta(MetaMessage meta) {
-    print(
-        'TopicMe routeMeta: favorites count: ${meta.favorites?.length ?? 'null'}');
+    // print('TopicMe routeMeta: favorites count: ${meta.favorites?.length ?? 'null'}');
     if (meta.favorites != null && meta.favorites!.isNotEmpty) {
       // 将新数据与本地缓存合并，按 id 倒序去重
       final Map<int, Favorite> map = {};
@@ -118,8 +117,7 @@ class TopicMe extends Topic {
         ..clear()
         ..addAll(ids.map((id) => map[id]!));
 
-      print(
-          'TopicMe routeMeta: merged favorites, total count: ${_favorites.length}');
+      // print('TopicMe routeMeta: merged favorites, total count: ${_favorites.length}');
       onFavoritesUpdated.add(List<Favorite>.from(_favorites));
     }
 
@@ -143,7 +141,7 @@ class TopicMe extends Topic {
         ..addAll(ids.map((id) => map[id]!));
 
       print(
-          'TopicMe routeMeta: merged categories, total count: ${_categories.length}');
+'TopicMe routeMeta: merged categories, total count: ${_categories.length}');
       onCategoriesUpdated.add(List<Category>.from(_categories));
     }
 

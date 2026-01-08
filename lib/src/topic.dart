@@ -792,7 +792,7 @@ class Topic {
 
   /// Process data message
   void routeData(DataMessage data) async {
-    print("routeData ： ${name ?? ''} $data ${data.seq}");
+    // print("routeData ： ${name ?? ''} $data ${data.seq}");
     if (data.content != null) {
       if (touched == null) {
         touched = data.ts;
