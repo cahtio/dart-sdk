@@ -888,15 +888,19 @@ class TopicMe extends Topic {
       {bool del = false}) {
     final cont = _contacts[contactName];
     // print('setLastMessage  ${message.seq} ${message.content}');
+    // print('setLastMessage-  ${cont.lastMRessage.seq}');
     if (cont == null) return;
     if ((cont.lastMessage?.seq ?? 0) <= (message.seq ?? 0)) {
+      // print('setLastMessage - 1111');
       cont.updated = message.ts;
       cont.lastMessage = message;
       onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
     } else if (del) {
       // 删除最后一条消息 才会进这里
+      // print('setLastMessage - 2222');
       cont.updated = DateTime.now();
       cont.lastMessage = message;
+      cont.unread = ((cont.unread ?? 0) > 0) ? cont.unread! - 1 : 0;
       onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
     }
   }
