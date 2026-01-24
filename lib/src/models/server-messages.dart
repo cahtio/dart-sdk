@@ -211,6 +211,16 @@ class DataMessage {
     this.hi,
   });
 
+  String get keyword {
+    if (content is String) {
+      return content as String;
+    }
+    if (content is num) {
+      return content.toString();
+    }
+    return '';
+  }
+
   static DataMessage fromMessage(Map<String, dynamic> msg) {
     return DataMessage(
       topic: msg['topic'],
@@ -238,6 +248,10 @@ class DataMessage {
       'hi': hi,
     };
   }
+
+  @override
+  String toString() =>
+      'DataMessage(topic: $topic, from: $from, head: $head, ts: $ts, seq: $seq, content: $content, noForwarding: $noForwarding, hi: $hi)';
 }
 
 class PresMessage {
@@ -378,6 +392,7 @@ class MomentMessage {
     );
   }
 }
+
 /// 朋友圈详情消息
 class MomentDetailMessage {
   /// 消息ID
@@ -408,6 +423,7 @@ class MomentDetailMessage {
   String toString() =>
       'MomentDetailMessage(id: $id, topic: $topic,moments: $moment)';
 }
+
 class CommentMessage {
   final String id;
   final String topic;

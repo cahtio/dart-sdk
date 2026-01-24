@@ -7,7 +7,7 @@ import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/stores/message-store.dart';
 
 class DatabaseManager {
-  static const int kSchemaVersion = 1;
+  static const int kSchemaVersion = 2;
   static final _instance = DatabaseManager._internal();
 
   static DatabaseManager get instance => _instance;
@@ -62,7 +62,7 @@ class DatabaseManager {
 
   Future<void> _dropTables(Database db) async {
     _log('Dropping local store (SQLite db).');
-    await message.destoryTable();
+    await message.destoryTable(db);
   }
 
   void _log(String msg) {

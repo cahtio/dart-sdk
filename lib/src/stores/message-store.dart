@@ -19,6 +19,7 @@ class MessageStore with StoreMixin {
   static const kColumnTs = 'ts';
   static const kColumnHigh = 'high';
   static const kColumnHead = 'head';
+  static const kColumnKeyword = 'keyword';
 
   late LoggerService _loggerService;
 
@@ -34,6 +35,7 @@ class MessageStore with StoreMixin {
         $kColumnFrom TEXT NOT NULL,
         $kColumnHead TEXT,
         $kColumnContent TEXT,
+        $kColumnKeyword TEXT,
         $kColumnSeq INTEGER NOT NULL,
         $kColumnHigh INTEGER,
         $kColumnTs INTEGER
@@ -41,7 +43,7 @@ class MessageStore with StoreMixin {
     ''');
   }
 
-  Future<void> destoryTable() async {
+  Future<void> destoryTable(Database db) async {
     return db.execute('DROP TABLE IF EXISTS $kTableName');
   }
 
@@ -51,7 +53,10 @@ class MessageStore with StoreMixin {
 
   Future<List<DataMessage>> query(String topic, {int limit = 20}) async {
     final maps = await db.query(kTableName,
-        where: '$kColumnTopic = ?', whereArgs: [topic], orderBy: '$kColumnSeq desc', limit: limit);
+        where: '$kColumnTopic = ?',
+        whereArgs: [topic],
+        orderBy: '$kColumnSeq desc',
+        limit: limit);
     return maps.map((row) => _convert(row)).toList().reversed.toList();
   }
 
@@ -125,13 +130,25 @@ class MessageStore with StoreMixin {
     );
   }
 
+  Future<List<DataMessage>> searchMessages(String topic, String keyword) async {
+    final maps = await db.query(
+      kTableName,
+      where: '$kColumnTopic = ? AND $kColumnKeyword LIKE ?',
+      whereArgs: [topic, '%$keyword%'],
+      orderBy: '$kColumnSeq DESC',
+    );
+
+    return maps.map((row) => _convert(row)).toList();
+  }
+
   Future<int> _count(String topic, String? from, int seq) async {
     final count = Sqflite.firstIntValue(await db.query(kTableName,
         columns: ['COUNT(*)'],
         where: '$kColumnTopic = ? AND $kColumnFrom = ? AND $kColumnSeq = ?',
         whereArgs: [topic, from ?? '', seq]));
     if (count == null) {
-      _logError('select count error; topic: $topic, from: ${from ?? ''}, seq: $seq');
+      _logError(
+          'select count error; topic: $topic, from: ${from ?? ''}, seq: $seq');
     }
     return count ?? 0;
   }
@@ -156,7 +173,8 @@ class MessageStore with StoreMixin {
           : jsonEncode(message.content),
       kColumnSeq: message.seq,
       kColumnHigh: message.hi,
-      kColumnTs: message.ts?.millisecondsSinceEpoch
+      kColumnTs: message.ts?.millisecondsSinceEpoch,
+      kColumnKeyword: message.keyword
     });
   }
 
@@ -171,7 +189,7 @@ class MessageStore with StoreMixin {
       return null;
     }
 
-    final values = <String, dynamic>{};
+    final values = <String, dynamic>{kColumnKeyword: message.keyword};
     if (message.head != null) {
       values[kColumnHead] = jsonEncode(message.head);
     }

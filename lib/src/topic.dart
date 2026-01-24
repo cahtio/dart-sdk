@@ -425,6 +425,10 @@ class Topic {
             TopicDescription(private: {'archive': archive ? true : DEL_CHAR})));
   }
 
+  Future<List<DataMessage>> searchMessages(String keyword) {
+    return _databaseManager.message.searchMessages(name ?? '', keyword);
+  }
+
   /// Delete messages. Hard-deleting messages requires Owner permission
   Future<CtrlMessage> deleteMessages(List<DelRange> ranges, bool hard) async {
     if (!isSubscribed) {
@@ -469,7 +473,7 @@ class Topic {
 
     var response = await result;
     var ctrl;
-    if(response is CtrlMessage) {
+    if (response is CtrlMessage) {
       ctrl = response;
     } else {
       ctrl = CtrlMessage.fromMessage(response);
@@ -655,7 +659,7 @@ class Topic {
 
   Future<List<DataMessage>?> getStoredMessages({int limit = 20}) async {
     if (name == null) return null;
-    return _databaseManager.message.query(name!, limit:limit);
+    return _databaseManager.message.query(name!, limit: limit);
   }
 
   Future<DataMessage?> getLastStoredMessage() async {
@@ -719,7 +723,7 @@ class Topic {
   DataMessage? flushMessage(int seqId) {
     var idx = _messages.find(DataMessage(seq: seqId), false);
     var d = idx >= 0 ? _messages.deleteAt(idx) : null;
-    if(seqId >= _maxSeq ) {
+    if (seqId >= _maxSeq) {
       // 如果删除的是最后一条消息
       deleteAndRestLastMsg();
     }
@@ -733,7 +737,7 @@ class Topic {
         ? _messages.deleteRange(
             since, _messages.find(DataMessage(seq: untilId), true))
         : [];
-    if(fromId >= _maxSeq || untilId >= _maxSeq) {
+    if (fromId >= _maxSeq || untilId >= _maxSeq) {
       // 如果删除的是最后一条消息
       deleteAndRestLastMsg();
     }
@@ -741,9 +745,9 @@ class Topic {
   }
 
   Future<void> deleteAndRestLastMsg() async {
-    var msg =  await _databaseManager.message.lastMessage(name!);
+    var msg = await _databaseManager.message.lastMessage(name!);
     var me = _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe;
-    if(msg != null && msg.seq != null) {
+    if (msg != null && msg.seq != null) {
       _maxSeq = max(msg.seq!, _maxSeq);
       me.setLastMessage(name ?? '', msg, del: true);
     }
@@ -998,18 +1002,17 @@ class Topic {
       if (me != null) {
         me.processMetaSub([
           TopicSubscription(
-            noForwarding: true,
-            topic: name,
-            updated: updated,
-            touched: touched,
-            acs: desc.acs,
-            seq: desc.seq,
-            read: desc.read,
-            recv: desc.recv,
-            public: desc.public,
-            private: desc.private,
-            isChannel: desc.chan
-          )
+              noForwarding: true,
+              topic: name,
+              updated: updated,
+              touched: touched,
+              acs: desc.acs,
+              seq: desc.seq,
+              read: desc.read,
+              recv: desc.recv,
+              public: desc.public,
+              private: desc.private,
+              isChannel: desc.chan)
         ]);
       }
     }
@@ -1189,7 +1192,8 @@ class Topic {
       // Found a new gap.
       if (prev.hi != null && prev.hi != 0) {
         // Previous is also a gap, alter it.
-        prev.hi = data.hi != null ? (data.hi! > 0 ? data.hi : data.seq) : data.seq;
+        prev.hi =
+            data.hi != null ? (data.hi! > 0 ? data.hi : data.seq) : data.seq;
         return;
       }
 
