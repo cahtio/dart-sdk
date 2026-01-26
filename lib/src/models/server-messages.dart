@@ -218,6 +218,9 @@ class DataMessage {
     if (content is num) {
       return content.toString();
     }
+    if (content is Map<String, dynamic>) {
+      return content['txt']?.toString() ?? '';
+    }
     return '';
   }
 

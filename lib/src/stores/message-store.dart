@@ -197,6 +197,7 @@ class MessageStore with StoreMixin {
       values[kColumnContent] = message.content is String
           ? message.content
           : jsonEncode(message.content);
+      values[kColumnKeyword] = message.keyword;
     }
     if (message.hi != null) {
       values[kColumnHigh] = message.hi;
