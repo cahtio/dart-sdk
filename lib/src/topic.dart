@@ -662,6 +662,11 @@ class Topic {
     return _databaseManager.message.query(name!, limit: limit);
   }
 
+  Future<List<DataMessage>?> getStoredMessagesWithSeq(int start, int end) async {
+    if (name == null) return null;
+    return _databaseManager.message.queryWithSeq(name!, start, end);
+  }
+
   Future<DataMessage?> getLastStoredMessage() async {
     if (name == null) return null;
     return _databaseManager.message.lastMessage(name!);

@@ -60,6 +60,14 @@ class MessageStore with StoreMixin {
     return maps.map((row) => _convert(row)).toList().reversed.toList();
   }
 
+  Future<List<DataMessage>> queryWithSeq(String topic, int start, int end) async {
+    final maps = await db.query(kTableName,
+        where: '$kColumnTopic = ? AND $kColumnSeq BETWEEN ? AND ?',
+        whereArgs: [topic, start, end],
+        orderBy: '$kColumnSeq desc');
+    return maps.map((row) => _convert(row)).toList().reversed.toList();
+  }
+
   Future<DataMessage?> lastMessage(String topic) async {
     final maps = await db.query(kTableName,
         where: '$kColumnTopic = ?',
