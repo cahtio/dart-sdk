@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'package:tinode/src/services/logger.dart';
 import 'package:tinode/src/stores/message-store.dart';
+import 'package:tinode/src/stores/voice-listened-store.dart';
 
 class DatabaseManager {
   static const int kSchemaVersion = 2;
@@ -13,6 +14,7 @@ class DatabaseManager {
   static DatabaseManager get instance => _instance;
 
   late MessageStore message;
+  late VoiceListenedStore voiceListened;
 
   late LoggerService _loggerService;
 
@@ -27,6 +29,10 @@ class DatabaseManager {
 
     message = GetIt.I.registerSingleton<MessageStore>(
       MessageStore(),
+    );
+
+    voiceListened = GetIt.I.registerSingleton<VoiceListenedStore>(
+      VoiceListenedStore(),
     );
 
     _initDatabase();
@@ -58,11 +64,13 @@ class DatabaseManager {
   Future<void> _createTables(Database db, int version) async {
     _log('Creating SQLite db tables.');
     await message.createTable(db);
+    await voiceListened.createTable(db);
   }
 
   Future<void> _dropTables(Database db) async {
     _log('Dropping local store (SQLite db).');
     await message.destoryTable(db);
+    await voiceListened.destoryTable(db);
   }
 
   void _log(String msg) {
@@ -71,5 +79,6 @@ class DatabaseManager {
 
   Future<void> reset() async {
     await message.clearTable();
+    await voiceListened.clearTable();
   }
 }
