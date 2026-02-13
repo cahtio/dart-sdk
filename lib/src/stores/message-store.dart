@@ -178,7 +178,7 @@ class MessageStore with StoreMixin {
       kColumnHead: message.head == null ? null : jsonEncode(message.head),
       kColumnContent: message.content is String
           ? message.content
-          : jsonEncode(message.content),
+          : jsonEncode(DataMessage.convertDateTimeToString(message.content)),
       kColumnSeq: message.seq,
       kColumnHigh: message.hi,
       kColumnTs: message.ts?.millisecondsSinceEpoch,
@@ -204,7 +204,7 @@ class MessageStore with StoreMixin {
     if (message.content != null) {
       values[kColumnContent] = message.content is String
           ? message.content
-          : jsonEncode(message.content);
+          : jsonEncode(DataMessage.convertDateTimeToString(message.content));
       values[kColumnKeyword] = message.keyword;
     }
     if (message.hi != null) {

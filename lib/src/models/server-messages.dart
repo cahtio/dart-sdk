@@ -92,13 +92,13 @@ class CtrlMessage {
       text: msg['text'],
       topic: msg['topic'],
       params: msg['params'],
-      ts: msg['ts'],
+      ts: msg['ts'] != null ? (msg['ts'] is String ? DateTime.parse(msg['ts']) : msg['ts']) : null,
     );
   }
 
   @override
   String toString() =>
-      'CtrlMessage(id: $id, topic: $topic, code: $code, text: $text, ts: $text, params: $params)';
+      'CtrlMessage(id: $id, topic: $topic, code: $code, text: $text, ts: $ts, params: $params)';
 }
 
 class MetaMessage {
@@ -230,7 +230,7 @@ class DataMessage {
       from: msg['from'],
       head: msg['head'],
       ts: msg['ts'] != null
-          ? (msg['ts'] is String ? DateTime.parse(msg['ts']) : msg['ts'])
+          ? (msg['ts'] is String ? DateTime.parse(msg['ts'].replaceFirst(' ', 'T')) : msg['ts'])
           : null,
       seq: msg['seq'],
       content: msg['content'],
@@ -244,14 +244,32 @@ class DataMessage {
       'topic': topic,
       'from': from,
       'head': head,
-      'ts': ts != null ? ts!.toIso8601String() : null,
+      'ts': ts != null ? ts?.toIso8601String() : null,
       'seq': seq,
-      'content': content,
+      'content': content is String ? content : convertDateTimeToString(content),
       'noForwarding': noForwarding,
       'hi': hi,
     };
   }
 
+  /// 递归地将 Map/List 中所有 DateTime 转成 ISO8601 字符串
+  static dynamic convertDateTimeToString(dynamic obj) {
+    if (obj is DateTime) {
+      return obj.toIso8601String();
+    }
+    if (obj is Map) {
+      final map = <String, dynamic>{};
+      obj.forEach((k, v) {
+        map[k.toString()] = convertDateTimeToString(v);
+      });
+      return map;
+    }
+    if (obj is List) {
+      return obj.map((e) => convertDateTimeToString(e)).toList();
+    }
+    return obj;
+  }
+  
   @override
   String toString() =>
       'DataMessage(topic: $topic, from: $from, head: $head, ts: $ts, seq: $seq, content: $content, noForwarding: $noForwarding, hi: $hi)';
