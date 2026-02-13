@@ -8,7 +8,7 @@ import 'package:tinode/src/stores/message-store.dart';
 import 'package:tinode/src/stores/voice-listened-store.dart';
 
 class DatabaseManager {
-  static const int kSchemaVersion = 2;
+  static const int kSchemaVersion = 3;
   static final _instance = DatabaseManager._internal();
 
   static DatabaseManager get instance => _instance;
@@ -51,8 +51,12 @@ class DatabaseManager {
       onCreate: _createTables,
       onUpgrade: (db, oldVersion, newVersion) async {
         _log('schema has changed from $oldVersion to $newVersion');
-        await _dropTables(db);
-        await _createTables(db, newVersion);
+        if (oldVersion < 3) {
+          await voiceListened.createTable(db);
+        } else {
+          await _dropTables(db);
+          await _createTables(db, newVersion);
+        }
       },
     );
 
