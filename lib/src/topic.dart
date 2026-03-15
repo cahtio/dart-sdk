@@ -853,6 +853,12 @@ class Topic {
 
     if (meta.del != null) {
       processDelMessages(meta.del!.clear!, meta.del!.delseq!);
+      if (meta.topic != null) {
+        final me =  _tinodeService.getTopic(topic_names.TOPIC_ME) as TopicMe?;
+        if (me != null) {
+          me.processDelseq(meta.topic!, meta.del!.delseq!);
+        }
+      }
     }
 
     if (meta.tags != null) {
@@ -1138,6 +1144,7 @@ class Topic {
       cached.updated = object.updated ?? cached.updated;
       cached.user = object.user ?? cached.user;
       cached.isChannel = object.isChannel ?? cached.isChannel;
+      cached.delseqs = object.delseqs;
       _cacheManager.putUser(userId, cached);
     } else {
       _cacheManager.putUser(userId, object);

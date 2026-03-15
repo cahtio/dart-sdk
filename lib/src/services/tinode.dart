@@ -590,6 +590,7 @@ class TinodeService {
     data.what = params.what;
     data.sub = params.sub?.toMap();
     data.favorite = params.favorite?.toMap();
+    data.del = params.del?.toMap();
 
     packet.data = data;
     return _send(packet);

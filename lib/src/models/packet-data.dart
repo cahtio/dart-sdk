@@ -157,8 +157,9 @@ class GetPacketData extends PacketData {
   dynamic sub;
   dynamic data;
   dynamic favorite;
+  dynamic del;
 
-  GetPacketData({this.topic, this.what, this.desc, this.sub, this.data, this.favorite});
+  GetPacketData({this.topic, this.what, this.desc, this.sub, this.data, this.favorite, this.del});
 
   @override
   Map<String, dynamic> toMap() {
@@ -168,6 +169,7 @@ class GetPacketData extends PacketData {
       'desc': desc,
       'sub': sub,
       'data': data,
+      'del': del,
       'favorite': favorite,
     };
   }

@@ -84,7 +84,7 @@ class TopicSubscription {
 
   String? mode;
 
-  int? unread;
+  // int? unread;
 
   DataMessage? lastMessage;
 
@@ -94,6 +94,23 @@ class TopicSubscription {
 
   /// 申请状态
   int? apply_status = 0;
+
+  List<DelRange> delseqs = [];
+
+  int get unread {
+    if (seq == null) return 0;
+    if (read == null) return seq!;
+    var count = seq! - read!;
+    final min = count;
+    for (var i = seq!; i > min; i--) {
+      for (var delseq in delseqs) {
+        if (delseq.isContain(i)) {
+          count--;
+        }
+      }
+    }
+    return count;
+  }
 
   TopicSubscription(
       {this.user,
@@ -113,7 +130,6 @@ class TopicSubscription {
       this.deleted,
       this.created,
       this.mode,
-      this.unread,
       this.lastMessage,
       this.isChannel,
       this.subCount,
@@ -140,7 +156,6 @@ class TopicSubscription {
       mode: msg['mode'],
       isChannel: msg['is_channel'] ?? false,
       apply_status: msg['apply_status'] ?? 0,
-      unread: msg['unread'],
       subCount: msg['sub_count'],
       lastMessage: msg['lastMessage'] != null
           ? DataMessage.fromMessage(msg['lastMessage'])
@@ -168,7 +183,6 @@ class TopicSubscription {
         noForwarding: noForwarding,
         mode: mode,
         isChannel: isChannel,
-        unread: unread,
         subCount: subCount,
         lastMessage: lastMessage);
   }
@@ -210,9 +224,19 @@ class TopicSubscription {
     if (seq != null) json['seq'] = seq;
     // if (seen != null) json['seen'] = seen!.toJson();
     if (noForwarding != null) json['noForwarding'] = noForwarding;
-    if (unread != null) json['unread'] = unread;
     if (subCount != null) json['sub_count'] = subCount;
     if (lastMessage != null) json['lastMessage'] = lastMessage!.toJson();
     return json;
+  }
+
+  void addDelseq(DelRange delseq) {
+    if (delseqs.contains(delseq)) return;
+    delseqs.add(delseq);
+  }
+
+  void addDelseqList(List<DelRange> list) {
+    for (final delseq in list) {
+      addDelseq(delseq);
+    }
   }
 }

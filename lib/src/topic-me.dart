@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tinode/src/models/category.dart';
+import 'package:tinode/src/models/del-range.dart';
 import 'package:tinode/src/models/moment.dart';
 import 'package:tinode/src/models/officialAccount-params.dart';
 import 'dart:math';
@@ -95,6 +96,20 @@ class TopicMe extends Topic {
     _databaseManager = GetIt.I.get<DatabaseManager>();
   }
 
+  void _requestSubscriptionClearSeq(TopicSubscription subscription) async {
+    _loggerService.log('_requestSubscriptionClearSeq ${subscription.topic} ${subscription.clear}');
+    if (subscription.topic == null || subscription.clear == null || subscription.clear == 0 || subscription.unread <= 0) return;
+    final topic = _tinodeService.getTopic(subscription.topic);
+    if (topic == null) return;
+    final query = GetQuery(topic: subscription.topic!, what: 'del', del: GetDataType(since: subscription.clear! - subscription.unread + 1));
+    if (!topic.isSubscribed) {
+      await topic.subscribe(query, null);
+      await topic.leave(false);
+    } else {
+      await topic.getMeta(query);
+    } 
+  }
+
   @override
   void routeMeta(MetaMessage meta) {
     // print('TopicMe routeMeta: favorites count: ${meta.favorites?.length ?? 'null'}');
@@ -176,6 +191,16 @@ class TopicMe extends Topic {
       ),
     );
   }
+  
+  void processDelseq(String topic, List<DelRange> delseq) {
+    final cache = _contacts[topic];
+    if (cache == null) return;
+    cache.addDelseqList(delseq);
+    for (final dseq in cache.delseqs) {
+      _loggerService.log('routeMeta for low:${dseq.low}; hi:${dseq.hi}');
+    }
+    _loggerService.log('routeMeta me topic:$topic; seq:${cache.seq}; read:${cache.read}; unread:${cache.unread}');
+  }
 
   /// Override the original Topic.processMetaDesc.
   @override
@@ -238,7 +263,7 @@ class TopicMe extends Topic {
           sub.seq = sub.seq ?? 0;
           sub.recv = sub.recv ?? 0;
           sub.read = sub.read ?? 0;
-          sub.unread = (sub.seq ?? 0) - (sub.read ?? 0);
+          // sub.unread = (sub.seq ?? 0) - (sub.read ?? 0);
         }
 
         var cached = _contacts[topicName];
@@ -275,6 +300,7 @@ class TopicMe extends Topic {
           _contacts[(topicName ?? '')] = sub;
         }
         cont = cached;
+        _requestSubscriptionClearSeq(cont);
 
         if (topicName != null) {
           cont.lastMessage ??=
@@ -397,7 +423,7 @@ class TopicMe extends Topic {
                 ? max((cont.read ?? 0), (cont.recv ?? 0))
                 : cont.read;
           }
-          cont.unread = (cont.seq ?? 0) - ((cont.read ?? 0) | 0);
+          // cont.unread = (cont.seq ?? 0) - ((cont.read ?? 0) | 0);
           break;
         case 'upd': // desc updated
           // Request updated subscription.
@@ -431,7 +457,7 @@ class TopicMe extends Topic {
           cont.recv = cont.recv != null && cont.recv != 0
               ? max((cont.read ?? 0), (cont.recv ?? 0))
               : cont.recv;
-          cont.unread = (cont.seq ?? 0) - (cont.read ?? 0);
+          // cont.unread = (cont.seq ?? 0) - (cont.read ?? 0);
           break;
         case 'gone':
           // topic deleted or unsubscribed from
@@ -440,6 +466,7 @@ class TopicMe extends Topic {
           break;
         case 'del':
           // Update topic.del value.
+          _requestSubscriptionClearSeq(cont);
           break;
         default:
           _loggerService
@@ -900,7 +927,7 @@ class TopicMe extends Topic {
       // print('setLastMessage - 2222');
       cont.updated = DateTime.now();
       cont.lastMessage = message;
-      cont.unread = ((cont.unread ?? 0) > 0) ? cont.unread! - 1 : 0;
+      // cont.unread = ((cont.unread ?? 0) > 0) ? cont.unread! - 1 : 0;
       onContactUpdate.add(ContactUpdateEvent('last_msg', cont));
     }
   }
@@ -950,7 +977,7 @@ class TopicMe extends Topic {
         }
         doUpdate = true;
       }
-      cont.unread = (cont.seq ?? 0) - (cont.read ?? 0);
+      // cont.unread = (cont.seq ?? 0) - (cont.read ?? 0);
 
       if (doUpdate && (cont.acs == null || !cont.acs!.isMuted(null))) {
         onContactUpdate.add(ContactUpdateEvent(what, cont));
