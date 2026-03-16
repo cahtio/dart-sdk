@@ -101,15 +101,20 @@ class TopicSubscription {
     if (seq == null) return 0;
     if (read == null) return seq!;
     var count = seq! - read!;
-    final min = count;
-    for (var i = seq!; i > min; i--) {
+    // 如果 read 意外地大于 seq，未读数应为 0。
+    if (count < 0) {
+      return 0;
+    }
+
+    // 遍历所有未读消息的序列号：从 read + 1 到 seq。
+    for (var i = read! + 1; i <= seq!; i++) {
       for (var delseq in delseqs) {
         if (delseq.isContain(i)) {
           count--;
         }
       }
     }
-    return count;
+    return count < 0 ? 0 : count;
   }
 
   TopicSubscription(

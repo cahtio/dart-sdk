@@ -97,7 +97,7 @@ class TopicMe extends Topic {
   }
 
   void _requestSubscriptionClearSeq(TopicSubscription subscription) async {
-    _loggerService.log('_requestSubscriptionClearSeq ${subscription.topic} ${subscription.clear}');
+    // _loggerService.log('_requestSubscriptionClearSeq ${subscription.topic} ${subscription.clear}');
     if (subscription.topic == null || subscription.clear == null || subscription.clear == 0 || subscription.unread <= 0) return;
     final topic = _tinodeService.getTopic(subscription.topic);
     if (topic == null) return;
